@@ -26,7 +26,7 @@ class Step:
     is_found: bool
     variable: str #the variable name
     next_quasis: int #refers to one or more indices in quasis
-    direction: bool
+    direction: bool = None
 
 class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
@@ -84,17 +84,19 @@ def parse(text):
             
 
 def instructions2steps():
-    for k in range(0):
-        if quasis[k].command in ['NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','UNREAD']:
+    global quasis
+    for k,quasi in enumerate(quasis):
+        if type(quasi)==Instruction and quasi.command in ['NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','UNREAD']:
             indices = [len(quasis)+s for s in range(2)]   
             quasis += [
-                Step(instruction=k,is_found=False,variable=instr.vard,next_quasis=[indices[1]]),
-                Step(instruction=k,is_found=True,variable=instr.vard,next_quasis=quasis[k].next_quasis)
+                Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
+                Step(instruction=k,is_found=True,variable=quasi.vard,next_quasis=quasi.next_quasis)
             ]
-            for quasi in quasis:
-                for j in range(len(quasi.next_quasis)):
-                    if quasi.next_quasis[j] == k:
-                        quasi.next_quasis[j] = indices[0]
+            for quasi1 in quasis:
+                if type(quasi1)==Instruction:
+                    for j in range(len(quasi1.next_quasis)):
+                        if quasi1.next_quasis[j] == k:
+                            quasi1.next_quasis[j] = indices[0]
 
 
 def compile():
