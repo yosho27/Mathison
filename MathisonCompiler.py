@@ -40,7 +40,7 @@ class MapParser(TextParsers):
     map_ = '{' >> repsep(mapping, ',') << '}' > dict
 
 def create_args(*args):
-    return (lambda x: Instruction(**dict(zip(('command',)+args,x))))
+    return (lambda x: Instruction(x[0],**dict(zip(args,x[1:]))))
 
 class LineParser(TextParsers,whitespace=None):
     s = reg(r'[ \t]+')
@@ -48,7 +48,7 @@ class LineParser(TextParsers,whitespace=None):
     label = valid << ':' > Label
     instr = (
       (lit('LOAD','STORE') & opt('NEXT') & opt('BIG') &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','temp'))
-    | (lit('UNREAD','JUMP','NOTs','COMPs') &s>> valid > create_args('vard'))
+    | (lit('UNREAD','JUMP','NOTs','COMPs','SEZ') &s>> valid > create_args('vard'))
     | ('MAP' &s>> MapParser.map_ > create_args('map_'))
     | ('BRANCH' &s>> pred(repsep(valid,s), lambda x: len(x)==4, 'list of four labels') > create_args('labels'))
     | ('LOADI' &s>> (ImmParser.imm2 &s>> 'ACC' | ImmParser.imm1 &s>> 'TEMP') > create_args('imm','temp'))
@@ -86,7 +86,8 @@ def parse(text):
 def instructions2steps():
     global quasis
     for k,quasi in enumerate(quasis):
-        if type(quasi)==Instruction and quasi.command in ['NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','UNREAD']:
+        if type(quasi)==Instruction and quasi.command in [
+                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','UNREAD', 'SEZ']:
             indices = [len(quasis)+s for s in range(2)]   
             quasis += [
                 Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
