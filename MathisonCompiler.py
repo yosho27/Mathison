@@ -243,6 +243,18 @@ def steps2states():
                 quasis.append(State(step=k,acc=acc,transitions=transitions,direction=direction))
         
 
+def replace_links(a,b):
+    global quasis
+    for quasi in quasis:
+        if type(quasi) in [Instruction,Step,End]:
+            for k in range(len(quasi.next_quasis)):
+                if quasi.next_quasis[k] == a:
+                    quasi.next_quasis[k] = b
+        elif type(quasi)==State:
+            for symbol in quasi.transitions:
+                if quasi.transitions[symbol][2] == a:
+                    quasi.transitions[symbol][2] = b
+
 def instructions2steps():
     global quasis
     for k,quasi in enumerate(quasis):
@@ -253,24 +265,84 @@ def instructions2steps():
                 Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
                 Step(instruction=k,is_found=True,variable=quasi.vard,next_quasis=quasi.next_quasis)
             ]
-            for quasi2 in quasis:
-                if type(quasi2) in [Instruction,End]:
-                    for j in range(len(quasi2.next_quasis)):
-                        if quasi2.next_quasis[j] == k:
-                            quasi2.next_quasis[j] = indices[0]
+            replace_links(k,indices[0])
 
-def apply_branches():
+def validate_maps(map_):
+    sizes = {(len(key),len(map_[key])) for key in map_}    
+    assert len(sizes)==1
+    return sizes.pop()
+
+def apply_posts():
     global quasis
-    for k,quasi in enumerate(quasis):
+    altered = False
+    for quasi in quasis:
         if type(quasi)==State:
-            pass
+            instruction = quasis[quasis[quasi.step].instruction]
+            for symbol in quasi.transitions:
+                transition = quasi.transitions[symbol]
+                quasi2 = quasis[transition[2]]
+                if type(quasi2)==Instruction:
+                    if quasi2.command=='JUMP':
+                        transition[2] = quasi2.next_quasis[0]
+                        altered = True
+                    elif quasi2.command=='BRANCH':
+                        transition[2] = quasi2.next_quasis[transition[1]]
+                        altered = True
+                    elif quasi2.command=='LOADI' and quasi2.loadto=='ACC':
+                        transition[1] = quasi2.imm
+                        transition[2] = quasi2.next_quasis[0]
+                        altered = True
+                    elif quasi2.command=='MAP':
+                        size = validate_maps(quasi2.map_)
+                        if size==(2,1):
+                            assert instruction.command=='LOAD' and instruction.loadto=='TEMP'
+                            if (transition[1],int(symbol)) in quasi2.map_:
+                                transition[1] = quasi2.map_[(transition[1],int(symbol))][0]
+                            transition[2] = quasi2.next_quasis[0]
+                            altered = True
+                        elif size==(1,1):
+                            if (transition[1],) in quasi2.map_:
+                                transition[1] = quasi2.map_[(transition[1],)][0]
+                            transition[2] = quasi2.next_quasis[0]                            
+                            altered = True
+    return altered
 
+def apply_pres():
+    global quasis
+    altered = False
+    for k,quasi in enumerate(quasis):
+        if type(quasi)==Instruction:
+            if quasi.command=='LOADI' and quasi.loadto=='TEMP':
+                pass
+            elif quasi.command=='MAP':
+                size = validate_maps(quasi.map_)
+                if size==(1,2):
+                    for quasi2 in quasis:
+                        if (type(quasi2)==State and quasis[quasi2.step].is_found and
+                                quasis[quasi.next_quasis[0]].next_quasis[0]==quasi2.step):
+                            for symbol in ['0','1']:
+                                transition = quasi2.transitions[symbol]
+                                if (quasi2.acc,) in quasi.map_:
+                                    mapping = quasi.map_[(quasi2.acc,)]
+                                    transition[0] = str(mapping[0]) + transition[0][1:]
+                                    transition[1] = mapping[1]
+                            altered = True
+                    replace_links(k,quasi.next_quasis[0])
+                    quasi.next_quasis[0] = 0
+    return altered
+                                    
 
 def compile_add():
-    quasis = []
+    global quasis
     file_text = open('add.s','r').read()
     parse(file_text)
     instructions2steps()
     steps2states()
+    more_posts,more_pres = True,True
+    while (more_posts or more_pres):
+        if more_posts:
+            more_posts = apply_posts()
+        if more_pres:
+            more_pres = apply_pres()
     for k,quasi in enumerate(quasis):
         print(k,quasi)
