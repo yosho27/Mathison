@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from parsita import *
+from parsita.util import splat
 
 more_transitions = {
     'COMPs':{
@@ -40,6 +41,17 @@ more_transitions = {
     }
 }
 
+@dataclass
+class FunctionHeader:
+    command: str
+    params: list #the type of argument is defined by the first letter,
+    #           'v' for variable, 'i' for immediate, 'm' for map
+
+@dataclass
+class FunctionCall:
+    command: str
+    args: list
+
 class Instruction:
     '''command: str
     read: bool = None
@@ -54,15 +66,12 @@ class Instruction:
     imm: int = None
     loadto: str = None #'ACC' or 'TEMP'
     '''
-    def __init__(self,command,read=None,big=None,var0=None,var1=None,vard=None,varr=None,
-                 map_=None,labels=None,next_quasis=None,imm=None,loadto=None):
+    def __init__(self,command,read=None,big=None,vard=None,map_=None,
+                 labels=None,next_quasis=None,imm=None,loadto=None):
         self.command = command
         self.read = bool(read)
         self.big = bool(big)
-        self.var0 = var0
-        self.var1 = var1
         self.vard = vard
-        self.varr = varr
         self.map_ = map_
         self.labels = labels
         self.next_quasis = next_quasis
@@ -105,7 +114,7 @@ class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
     imm2d = reg(r'[0123]') > int
     imm2b = reg(r'[01]{2}') > (lambda x: int(x,2))
-    imm2 = imm2d | imm2b
+    imm2 = imm2b | imm2d
 
 class MapParser(TextParsers):
     state = ImmParser.imm2 & opt('x' >> ImmParser.imm1) > (lambda x: tuple([x[0]]+x[1]))
@@ -119,6 +128,9 @@ class LineParser(TextParsers,whitespace=None):
     s = reg(r'[ \t]+')
     valid = reg(r'[A-Za-z][A-Za-z0-9_]*')
     label = valid << ':' > Label
+    arg = reg(r'[vimVIM][A-Za-z0-9_]*')
+    function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
+    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > 
     instr = (
       (lit('LOAD','STORE') & opt('NEXT') & opt('BIG') &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','loadto'))
     | (lit('UNREAD','JUMP','NOTs','COMPs','SEZ') &s>> valid > create_args('vard'))
@@ -128,7 +140,7 @@ class LineParser(TextParsers,whitespace=None):
     | (lit('SLLs','SRLs','ZEROs') &s>> valid &s>> ImmParser.imm1 > create_args('vard','imm'))
     | (lit('SLL2s','SRL2s','ADDIs','SUBIs') &s>> valid &s>> ImmParser.imm2 > create_args('vard','imm'))
        )
-    line = instr | label
+    line = instr | label | function_header | function_call
 
 def find_next_instruction(k,label):
     for j in range(k,len(quasis)):

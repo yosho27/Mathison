@@ -1,3 +1,5 @@
+FUNC ADD vard var0 var1
+
 start:
 LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 1x0:1, 1x1:2}
