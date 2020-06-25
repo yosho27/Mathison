@@ -1,6 +1,44 @@
 from dataclasses import dataclass
 from parsita import *
 
+more_transitions = {
+    'COMPs':{
+        0:{'0':['1',0],'1':['0',0]},
+        1:{'0':['0',1],'1':['1',0]}
+    },
+    'SLLs':{
+        0:{'0':['0',0],'1':['0',1]},
+        1:{'0':['1',0],'1':['1',1]}
+    },
+    'SRLs':{
+        0:{'0':['0',0],'1':['0',1]},
+        1:{'0':['1',0],'1':['1',1]}
+    },
+    'SLL2s':{
+        0b00:{'0':['0',0b00],'1':['0',0b10]},
+        0b01:{'0':['1',0b00],'1':['1',0b10]},
+        0b10:{'0':['0',0b01],'1':['0',0b11]},
+        0b11:{'0':['1',0b01],'1':['1',0b11]}
+    },
+    'SRL2s':{
+        0b00:{'0':['0',0b00],'1':['0',0b01]},
+        0b10:{'0':['1',0b00],'1':['1',0b01]},
+        0b01:{'0':['0',0b10],'1':['0',0b11]},
+        0b11:{'0':['1',0b10],'1':['1',0b11]}
+    },
+    'ADDIs':{
+        0:{'0':['0',0],'1':['1',0]},
+        1:{'0':['1',0],'1':['0',1]},
+        2:{'0':['0',1],'1':['1',1]},
+        3:{'0':['1',1],'1':['0',2]}
+    },
+    'SUBIs':{
+        0:{'0':['0',0],'1':['1',0]},
+        1:{'0':['1',1],'1':['0',0]},
+        2:{'0':['0',1],'1':['1',1]},
+        3:{'0':['1',2],'1':['0',1]}
+    }
+}
 
 class Instruction:
     '''command: str
@@ -31,6 +69,9 @@ class Instruction:
         self.imm = imm
         self.loadto = loadto
 
+    def __str__(self):
+        return 'Instruction(' + self.command + ', next_quasis=' + str(self.next_quasis) + ')'
+
 @dataclass
 class Label:
     name: str
@@ -40,14 +81,19 @@ class Step:
     instruction: int #refers to an index in quasis
     is_found: bool
     variable: str #the variable name
-    next_quasis: int #refers to one or more indices in quasis
+    next_quasis: list #refers to one or more indices in quasis
     direction: bool = None
+
+@dataclass
+class End:
+    is_start: bool
+    next_quasis: list
 
 @dataclass
 class State:
     step: int #refers to an index in quasis
     acc: int
-    transitions: dict #{symbol:(step,acc)}
+    transitions: dict #{symbol:[symbol,acc,step)}
     direction: int #+1 or -1
 
 @dataclass(frozen=True,eq=True)
@@ -87,7 +133,7 @@ class LineParser(TextParsers,whitespace=None):
 def find_next_instruction(k,label):
     for j in range(k,len(quasis)):
         if label=='null':
-            if type(quasis[j])==Instruction:
+            if type(quasis[j])==Instruction or type(quasis[j])==End and not quasis[j].is_start:
                 return j
         else:
             if type(quasis[j])==Label and quasis[j].name==label:
@@ -97,7 +143,7 @@ def find_next_instruction(k,label):
 def parse(text):
     global quasis
     lines = [line.strip() for line in text.split('\n')]
-    quasis = [LineParser.line.parse(line).value for line in lines if line]
+    quasis = [End(True,[])]+[LineParser.line.parse(line).value for line in lines if line]+[End(False,[])]
     for k,quasi in enumerate(quasis):
         if type(quasi)==Instruction:
             if quasi.command in ['LOAD','STORE']:
@@ -108,6 +154,8 @@ def parse(text):
                 quasi.next_quasis = [find_next_instruction(0,quasi.labels[j]) for j in range(4)]
             else:
                 quasi.next_quasis = [find_next_instruction(k+1,'null')]
+        elif type(quasi)==End and quasi.is_start:
+            quasi.next_quasis = [find_next_instruction(0,'null')]
 
 def group_unreads():
     global quasis
@@ -129,7 +177,7 @@ def get_search_transitions(n_step,acc):
         direction = 1
     else:
         direction = 0
-    return {Symbol(step.variable,direction):(None,init_state,step.next_quasis[0])},None
+    return {Symbol(step.variable,direction):[None,init_state,step.next_quasis[0]]},None
     
 
 def get_found_transitions(n_step,acc):
@@ -137,87 +185,46 @@ def get_found_transitions(n_step,acc):
     step = quasis[n_step]
     instruction = quasis[step.instruction]
     command = instruction.command
-    #If 0' and 1' aren't specified, assume that they're the same as 0 and 1
     transitions = None
-    #"other primitive commands" except SEZ
+    #ACC preserving commands
     if command=='NOTs':
-        transitions={'0':('1',acc),'1':('0',acc)}
+        transitions={'0':['1',acc],'1':['0',acc]}
     elif command=='ZEROs':
         imm = str(instruction.imm)
-        transitions={'0':(imm,acc),'1':(imm,acc)}
-    elif command=='COMPs':
-        if acc==0:
-            transitions={'0':('1',0),'1':('0',0)}
-        elif acc==1:
-            transitions={'0':('0',1),'1':('1',0)}
-    elif command in ['SLLs','SRLs']:
-        if acc==0:
-            transitions={'0':('0',0),'1':('0',1)}
-        elif acc==1:
-            transitions={'0':('1',0),'1':('1',1)}
-    elif command=='SLL2s':
-        if acc==0b00:
-            transitions={'0':('0',0b00),'1':('0',0b10)}
-        elif acc==0b01:
-            transitions={'0':('1',0b00),'1':('1',0b10)}
-        elif acc==0b10:
-            transitions={'0':('0',0b01),'1':('0',0b11)}
-        elif acc==0b11:
-            transitions={'0':('1',0b01),'1':('1',0b11)}
-    elif command=='SRL2s':
-        if acc==0b00:
-            transitions={'0':('0',0b00),'1':('0',0b01)}
-        elif acc==0b10:
-            transitions={'0':('1',0b00),'1':('1',0b01)}
-        elif acc==0b01:
-            transitions={'0':('0',0b10),'1':('0',0b11)}
-        elif acc==0b11:
-            transitions={'0':('1',0b10),'1':('1',0b11)}
-    elif command=='ADDIs':
-        if acc==0:
-            transitions={'0':('0',0),'1':('1',0)}
-        elif acc==1:
-            transitions={'0':('1',0),'1':('0',1)}
-        elif acc==2:
-            transitions={'0':('0',1),'1':('1',1)}
-        elif acc==3:
-            transitions={'0':('1',1),'1':('0',2)}
-    elif command=='SUBIs':
-        if acc==0:
-            transitions={'0':('0',0),'1':('1',0)}
-        elif acc==1:
-            transitions={'0':('1',1),'1':('0',0)}
-        elif acc==2:
-            transitions={'0':('0',1),'1':('1',1)}
-        elif acc==3:
-            transitions={'0':('1',2),'1':('0',1)}
+        transitions={'0':[imm,acc],'1':[imm,acc]}
+    #"Other primitive commands" except SEZ and ACC-preserving
+    elif command in more_transitions.keys():
+        if acc in more_transitions[command].keys():
+            transitions = more_transitions[command][acc]
+        else:
+            return None,None
+    #"Other primitive commands" except SEZ
     if command in ['SRLs','SRL2s']:
         direction = -1
     else:
         direction = +1
     if transitions:
         for symbol in transitions:
-            transitions[symbol] += (n_step,)
+            transitions[symbol] += [n_step]
             transitions[symbol+'\''] = transitions[symbol]
-        transitions[Symbol(step.variable,direction)] = (None,acc,step.next_quasis[0])
+        transitions[Symbol(step.variable,direction)] = [None,acc,step.next_quasis[0]]
         return transitions,direction
     #SEZ
     if command=='SEZ':
-        return {'0':('0',acc,n_step),'1':('1',0,step.next_quasis[0]),
-                     Symbol(step.variable,+1):(None,1,step.next_quasis[0])},+1
+        return {'0':['0',acc,n_step],'1':['1',0,step.next_quasis[0]],
+                     Symbol(step.variable,+1):[None,1,step.next_quasis[0]]},+1
     #All LOAD and STORE commands
-    mark_read = '\'' if instruction.read else ''
     use_temp = instruction.loadto=='TEMP'
     direction = 1-2*instruction.big
     if command=='LOAD':
-        transitions={'0':('0'+mark_read, acc if use_temp else 0),
-                '1':('1'+mark_read, acc if use_temp else 1)}
+        transitions={'0':['0', acc if use_temp else 0],'1':['1', acc if use_temp else 1]}
     elif command=='STORE':        
-        transitions={'0':(('0' if use_temp else str(acc))+mark_read, acc),
-                '1':(('1' if use_temp else str(acc))+mark_read, acc)}
+        transitions={'0':['0' if use_temp else str(acc), acc],'1':['1' if use_temp else str(acc), acc]}
     if transitions:
         for symbol in transitions:
-            transitions[symbol] += (step.next_quasis[0],)
+            if instruction.read:
+                transitions[symbol][0] += '\''
+            transitions[symbol] += [step.next_quasis[0]]
         transitions.update(
             {'0\'':('0\'',acc,n_step),'1\'':('1\'',acc,n_step),
             Symbol(step.variable,direction):(None,acc,step.next_quasis[1])})
@@ -246,12 +253,24 @@ def instructions2steps():
                 Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
                 Step(instruction=k,is_found=True,variable=quasi.vard,next_quasis=quasi.next_quasis)
             ]
-            for quasi1 in quasis:
-                if type(quasi1)==Instruction:
-                    for j in range(len(quasi1.next_quasis)):
-                        if quasi1.next_quasis[j] == k:
-                            quasi1.next_quasis[j] = indices[0]
+            for quasi2 in quasis:
+                if type(quasi2) in [Instruction,End]:
+                    for j in range(len(quasi2.next_quasis)):
+                        if quasi2.next_quasis[j] == k:
+                            quasi2.next_quasis[j] = indices[0]
+
+def apply_branches():
+    global quasis
+    for k,quasi in enumerate(quasis):
+        if type(quasi)==State:
+            pass
 
 
-def compile():
+def compile_add():
     quasis = []
+    file_text = open('add.s','r').read()
+    parse(file_text)
+    instructions2steps()
+    steps2states()
+    for k,quasi in enumerate(quasis):
+        print(k,quasi)
