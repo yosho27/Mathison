@@ -226,8 +226,8 @@ def get_found_transitions(n_step,acc):
                 transitions[symbol][0] += '\''
             transitions[symbol] += [step.next_quasis[0]]
         transitions.update(
-            {'0\'':('0\'',acc,n_step),'1\'':('1\'',acc,n_step),
-            Symbol(step.variable,direction):(None,acc,step.next_quasis[1])})
+            {'0\'':['0\'',acc,n_step],'1\'':['1\'',acc,n_step],
+            Symbol(step.variable,direction):[None,acc,step.next_quasis[1]]})
         return transitions,direction
     
 
@@ -312,28 +312,62 @@ def apply_pres():
     altered = False
     for k,quasi in enumerate(quasis):
         if type(quasi)==Instruction:
-            if quasi.command=='LOADI' and quasi.loadto=='TEMP':
-                pass
-            elif quasi.command=='MAP':
-                size = validate_maps(quasi.map_)
-                if size==(1,2):
+            if quasi.command=='MAP' or quasi.command=='LOADI' and quasi.loadto=='TEMP':
+                if quasi.command=='MAP':
+                    size = validate_maps(quasi.map_)
+                if quasi.command=='LOADI' or size==(1,2):
                     for quasi2 in quasis:
                         if (type(quasi2)==State and quasis[quasi2.step].is_found and
                                 quasis[quasi.next_quasis[0]].next_quasis[0]==quasi2.step):
                             for symbol in ['0','1']:
                                 transition = quasi2.transitions[symbol]
-                                if (quasi2.acc,) in quasi.map_:
-                                    mapping = quasi.map_[(quasi2.acc,)]
-                                    transition[0] = str(mapping[0]) + transition[0][1:]
-                                    transition[1] = mapping[1]
+                                if quasi.command=='MAP':
+                                    if (quasi2.acc,) in quasi.map_:
+                                        mapping = quasi.map_[(quasi2.acc,)]
+                                        transition[0] = str(mapping[0]) + transition[0][1:]
+                                        transition[1] = mapping[1]
+                                else:
+                                    transition[0] = str(quasi.imm) + transition[0][1:]
                             altered = True
                     replace_links(k,quasi.next_quasis[0])
                     quasi.next_quasis[0] = 0
     return altered
-                                    
+
+def find_state(acc,step):
+    global quasis
+    if type(quasis[step])==Step:
+        for k,quasi in enumerate(quasis):
+            if type(quasi)==State and quasi.acc==acc and quasi.step==step:
+                return k
+    else:
+        return step
+
+def stitch_acc():
+    global quasis
+    for quasi in quasis:
+        if type(quasi)==End and quasi.is_start:
+            quasi.next_quasis[0] = find_state(0,quasi.next_quasis[0])
+        if type(quasi)==State:
+            for symbol in quasi.transitions:
+                transition = quasi.transitions[symbol]
+                transition[2] = find_state(transition[1],transition[2])
+
+def find_successors(k):
+    global quasis,used_states
+    if type(quasis[k])==End:
+        for j in quasis[k].next_quasis:
+            if not j in used_states:
+                used_states.add(j)
+                find_successors(j)
+    if type(quasis[k])==State:
+        for symbol in quasis[k].transitions:
+            j = quasis[k].transitions[symbol][2]
+            if not j in used_states:
+                used_states.add(j)
+                find_successors(j)
 
 def compile_add():
-    global quasis
+    global quasis, used_states
     file_text = open('add.s','r').read()
     parse(file_text)
     instructions2steps()
@@ -344,5 +378,9 @@ def compile_add():
             more_posts = apply_posts()
         if more_pres:
             more_pres = apply_pres()
+    stitch_acc()
+    used_states = {0}
+    find_successors(0)
     for k,quasi in enumerate(quasis):
-        print(k,quasi)
+        if k in used_states:
+            print(k,quasi)
