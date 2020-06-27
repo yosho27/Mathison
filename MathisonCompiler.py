@@ -520,10 +520,24 @@ def find_successors(k):
                 used_states.add(j)
                 find_successors(j)
 
+def merge_links():
+    for k,state1 in enumerate(quasis):
+        if type(state1)==State:
+            for j,state2 in enumerate(quasis):
+                if j>k:
+                    if type(state2)==State:
+                        if state1.transitions==state2.transitions:
+                            quasis[j]=None
+                            print('merge',j,k)
+                            replace_links(j,k)
+                            return True
+    return False
+					
+
 def compile_add():
     global quasis, used_states
-    file_text = open('add.s','r').read()
-    parse(file_text)
+    function = LineParser.line.parse('RECP A B C').value
+    evaluate_function_call(function)
     instructions2steps()
     steps2states()
     more_posts,more_pres = True,True
@@ -533,6 +547,9 @@ def compile_add():
         if more_pres:
             more_pres = apply_pres()
     stitch_acc()
+    more_merges = True
+    while more_merges:
+        more_merges = merge_links()
     used_states = {0}
     find_successors(0)
     for k,quasi in enumerate(quasis):
