@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from parsita import *
-from parsita.util import splat
+from parsita.util import constant,splat
+import os
 
 more_transitions = {
     'COMPs':{
@@ -41,16 +42,27 @@ more_transitions = {
     }
 }
 
+functions = []
+quasis = []
+
 @dataclass
 class FunctionHeader:
     command: str
     params: list #the type of argument is defined by the first letter,
     #           'v' for variable, 'i' for immediate, 'm' for map
+    lines: list = None
 
 @dataclass
 class FunctionCall:
     command: str
     args: list
+    next_quasis: list = None
+
+    def apply(self,index,argsdict):
+        return FunctionCall(
+            command=self.command,
+            args=[(argsdict[arg] if (type(arg)==str and arg in argsdict) else arg) for arg in self.args],
+            next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
 
 class Instruction:
     '''command: str
@@ -79,7 +91,19 @@ class Instruction:
         self.loadto = loadto
 
     def __str__(self):
-        return 'Instruction(' + self.command + ', next_quasis=' + str(self.next_quasis) + ')'
+        result = 'Instruction(' + self.command
+        if self.read:
+            result+='NEXT'
+        if self.big:
+            result+='BIG'
+        if self.vard:
+            result+=', vard=' + self.vard
+        if self.map_:
+            result+=', map=' + str(self.map_)
+        if self.imm:
+            result+=', imm=' + str(self.imm)
+        result += ', next_quasis=' + str(self.next_quasis) + ')'
+        return result
 
 @dataclass
 class Label:
@@ -97,6 +121,11 @@ class Step:
 class End:
     is_start: bool
     next_quasis: list
+
+    def apply(self,index):
+        return End(
+            is_start=self.is_start,
+            next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
 
 @dataclass
 class State:
@@ -124,15 +153,43 @@ class MapParser(TextParsers):
 def create_args(*args):
     return (lambda x: Instruction(x[0],**dict(zip(args,x[1:]))))
 
+def functioncall2instruction(function_call):
+    command = function_call.command
+    memory_command = is_memory_command(command)
+    args = function_call.args
+    instr = None
+    if memory_command:
+        instr = Instruction(memory_command[0],read=memory_command[1],big=memory_command[2],vard=args[0],loadto=args[1])
+    elif command in ['UNREAD','NOTs','COMPs','SEZ']:
+        instr = Instruction(command,vard=args[0])
+    elif command=='JUMP':
+        instr = Instruction(command,labels=[args[0]])
+    elif command=='BRANCH':
+        instr = Instruction(command,labels=[args[k] for k in range(4)])
+    elif command=='LOADI':
+        instr = Instruction(command,imm=args[0],loadto=args[1])
+    elif command=='MAP':
+        instr = Instruction(command,map_=args[0])
+    elif command in ['SLLs','SRLs','ZEROs','SLL2s','SRL2s','ADDIs','SUBIs']:
+        instr = Instruction(command,vard=args[0],imm=args[1])
+    if instr:
+        instr.next_quasis = function_call.next_quasis[:]
+        return instr
+    else:
+        return function_call
+    
+
 class LineParser(TextParsers,whitespace=None):
     s = reg(r'[ \t]+')
     valid = reg(r'[A-Za-z][A-Za-z0-9_]*')
     label = valid << ':' > Label
     arg = reg(r'[vimVIM][A-Za-z0-9_]*')
     function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
-    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > 
+    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
+    memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
+    end = lit('END') > constant(End(False,[]))
     instr = (
-      (lit('LOAD','STORE') & opt('NEXT') & opt('BIG') &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','loadto'))
+      (memory_command &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','loadto'))
     | (lit('UNREAD','JUMP','NOTs','COMPs','SEZ') &s>> valid > create_args('vard'))
     | ('MAP' &s>> MapParser.map_ > create_args('map_'))
     | ('BRANCH' &s>> pred(repsep(valid,s), lambda x: len(x)==4, 'list of four labels') > create_args('labels'))
@@ -140,7 +197,7 @@ class LineParser(TextParsers,whitespace=None):
     | (lit('SLLs','SRLs','ZEROs') &s>> valid &s>> ImmParser.imm1 > create_args('vard','imm'))
     | (lit('SLL2s','SRL2s','ADDIs','SUBIs') &s>> valid &s>> ImmParser.imm2 > create_args('vard','imm'))
        )
-    line = instr | label | function_header | function_call
+    line = end | label | function_header | function_call
 
 def find_next_instruction(k,label):
     for j in range(k,len(quasis)):
@@ -150,7 +207,84 @@ def find_next_instruction(k,label):
         else:
             if type(quasis[j])==Label and quasis[j].name==label:
                 label='null'
-            
+
+def find_next_function(lines,k,label):
+    for j in range(k,len(lines)):
+        if label=='null':
+            if type(lines[j])==FunctionCall or type(lines[j])==End and not lines[j].is_start:
+                return j
+        else:
+            if type(lines[j])==Label and lines[j].name==label:
+                label='null'
+
+def parse_files():
+    global functions
+    for filename in os.listdir():
+        if filename.endswith('.s'):
+            text = open(filename,'r').read()
+            lines = [line.strip() for line in text.split('\n')]
+            function = None
+            for line in lines:
+                if line:
+                    parsed_line = LineParser.line.parse(line).value
+                    if function:
+                        if type(parsed_line)==FunctionHeader:
+                            raise Exception
+                        elif type(parsed_line)==End:
+                            function.lines.append(parsed_line)
+                            functions.append(function)
+                            function = None
+                        else:
+                            function.lines.append(parsed_line)
+                    else:                        
+                        if type(parsed_line)==FunctionHeader:
+                            function = parsed_line
+                            function.lines = [End(True,[])]
+
+def is_memory_command(command):
+    memory_command = LineParser.memory_command.parse(command)
+    if type(memory_command)==Success:
+        return memory_command.value
+    else:
+        return None
+
+def link_lines():
+    global functions
+    for function in functions:
+        lines = function.lines
+        for k,quasi in enumerate(lines):
+            if type(quasi)==FunctionCall:
+                if is_memory_command(quasi.command):
+                    quasi.next_quasis = [find_next_function(lines,k+1,'null'),find_next_function(lines,k+1,'oob')]
+                elif quasi.command=='JUMP':
+                    quasi.next_quasis = [find_next_function(lines,0,quasi.args[0])]
+                elif quasi.command=='BRANCH':
+                    quasi.next_quasis = [find_next_function(lines,k+1 if quasi.args[j]=='null' else 0,quasi.args[j]) for j in range(4)]
+                else:
+                    quasi.next_quasis = [find_next_function(lines,k+1,'null')]
+            elif type(quasi)==End and quasi.is_start:
+                quasi.next_quasis = [find_next_function(lines,0,'null')]
+
+def evaluate_function_call(function_call):
+    global functions, quasis
+    for function in functions:
+        if function.command==function_call.command:
+            assert len(function.params)==len(function_call.args)
+            index = len(quasis)
+            argsdict = dict(zip(function.params,function_call.args))
+            quasis += [None]*len(function.lines)
+            for k,line in enumerate(function.lines):
+                if type(line)==FunctionCall:
+                    new_function = functioncall2instruction(line.apply(index,argsdict))
+                    quasis[index+k] = new_function
+                    if type(new_function)==FunctionCall:
+                        replace_links(index+k,len(quasis))
+                        evaluate_function_call(new_function)
+                elif type(line)==End:
+                    if line.is_start:
+                        quasis[index+k] = line.apply(index)
+                    else:
+                        quasis[index+k] = End(False,function_call.next_quasis)
 
 def parse(text):
     global quasis
@@ -181,7 +315,7 @@ def get_search_transitions(n_step,acc):
     imm = instruction.imm
     if command=='COMPs':
         init_state = 1
-    elif command in ['NOTs','ZEROs','LOAD','STORE','SEZ']:
+    elif command in ['NOTs','ZEROs','LOAD','STORE','SEZ','UNREAD']:
         init_state = acc
     elif command in ['SLLs','SRLs','SLL2s','SRL2s','ADDIs','SUBIs']:
         init_state = imm
@@ -218,7 +352,7 @@ def get_found_transitions(n_step,acc):
     if transitions:
         for symbol in transitions:
             transitions[symbol] += [n_step]
-            transitions[symbol+'\''] = transitions[symbol]
+        transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
         transitions[Symbol(step.variable,direction)] = [None,acc,step.next_quasis[0]]
         return transitions,direction
     #SEZ
@@ -241,7 +375,11 @@ def get_found_transitions(n_step,acc):
             {'0\'':['0\'',acc,n_step],'1\'':['1\'',acc,n_step],
             Symbol(step.variable,direction):[None,acc,step.next_quasis[1]]})
         return transitions,direction
-    
+    #UNREAD
+    if command=='UNREAD':
+        return {'0':['0',acc,n_step],'1':['1',acc,n_step],
+                '0\'':['0',acc,n_step],'1\'':['1',acc,n_step],
+                     Symbol(step.variable,+1):[None,acc,step.next_quasis[0]]},+1
 
 def steps2states():
     global quasis
@@ -252,13 +390,14 @@ def steps2states():
                     transitions,direction = get_found_transitions(k,acc)
                 else:
                     transitions,direction = get_search_transitions(k,acc)
-                quasis.append(State(step=k,acc=acc,transitions=transitions,direction=direction))
+                if transitions:
+                    quasis.append(State(step=k,acc=acc,transitions=transitions,direction=direction))
         
 
 def replace_links(a,b):
     global quasis
     for quasi in quasis:
-        if type(quasi) in [Instruction,Step,End]:
+        if type(quasi) in [Instruction,Step,End] and quasi.next_quasis:
             for k in range(len(quasi.next_quasis)):
                 if quasi.next_quasis[k] == a:
                     quasi.next_quasis[k] = b
@@ -271,7 +410,7 @@ def instructions2steps():
     global quasis
     for k,quasi in enumerate(quasis):
         if type(quasi)==Instruction and quasi.command in [
-                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ']:
+                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ','UNREAD']:
             indices = [len(quasis)+s for s in range(2)]   
             quasis += [
                 Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
@@ -317,6 +456,9 @@ def apply_posts():
                                 transition[1] = quasi2.map_[(transition[1],)][0]
                             transition[2] = quasi2.next_quasis[0]                            
                             altered = True
+                elif type(quasi2)==End and quasi2.next_quasis:
+                    transition[2] = quasi2.next_quasis[0]
+                    altered = True
     return altered
 
 def apply_pres():
@@ -366,7 +508,7 @@ def stitch_acc():
 
 def find_successors(k):
     global quasis,used_states
-    if type(quasis[k])==End:
+    if type(quasis[k])==End and quasis[k].next_quasis:
         for j in quasis[k].next_quasis:
             if not j in used_states:
                 used_states.add(j)
@@ -396,3 +538,6 @@ def compile_add():
     for k,quasi in enumerate(quasis):
         if k in used_states:
             print(k,quasi)
+
+parse_files()
+link_lines()
