@@ -134,10 +134,36 @@ class State:
     transitions: dict #{symbol:[symbol,acc,step)}
     direction: int #+1 or -1
 
+def get_none_transition(state,symbol,k):
+    if symbol in state.transitions:
+        transition = state.transitions[symbol]
+        if transition[0]==None:
+            transition[0] = symbol
+    else:
+        transition = [symbol,0,k]
+    return transition
+    
+
+def equal_states(k,j):
+    state1,state2 = quasis[k],quasis[j]
+    if type(state1)!=State or type(state2)!=State:
+        return False
+    for symbol in state1.transitions.keys()|state2.transitions.keys():
+        transition1 = get_none_transition(state1,symbol,k)
+        transition2 = get_none_transition(state2,symbol,j)
+        if not (transition1[0]==transition2[0] and
+                (transition1[2]==transition2[2] or transition1[2]==k and transition2[2]==j)):
+            return False
+    return True
+            
+        
 @dataclass(frozen=True,eq=True)
 class Symbol:
     symbol: str
     offset: int = 0
+
+    def __repr__(self):
+        return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
 
 class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
@@ -346,7 +372,7 @@ def get_found_transitions(n_step,acc):
             return None,None
     #"Other primitive commands" except SEZ
     if command in ['SRLs','SRL2s']:
-        direction = -1
+        direction = 0
     else:
         direction = +1
     if transitions:
@@ -354,14 +380,13 @@ def get_found_transitions(n_step,acc):
             transitions[symbol] += [n_step]
         transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
         transitions[Symbol(step.variable,direction)] = [None,acc,step.next_quasis[0]]
-        return transitions,direction
+        return transitions,2*direction-1
     #SEZ
     if command=='SEZ':
         return {'0':['0',acc,n_step],'1':['1',0,step.next_quasis[0]],
                      Symbol(step.variable,+1):[None,1,step.next_quasis[0]]},+1
     #All LOAD and STORE commands
     use_temp = instruction.loadto=='TEMP'
-    direction = 1-2*instruction.big
     if command=='LOAD':
         transitions={'0':['0', acc if use_temp else 0],'1':['1', acc if use_temp else 1]}
     elif command=='STORE':        
@@ -373,8 +398,8 @@ def get_found_transitions(n_step,acc):
             transitions[symbol] += [step.next_quasis[0]]
         transitions.update(
             {'0\'':['0\'',acc,n_step],'1\'':['1\'',acc,n_step],
-            Symbol(step.variable,direction):[None,acc,step.next_quasis[1]]})
-        return transitions,direction
+            Symbol(step.variable,1-instruction.big):[None,acc,step.next_quasis[1]]})
+        return transitions,1-2*instruction.big
     #UNREAD
     if command=='UNREAD':
         return {'0':['0',acc,n_step],'1':['1',acc,n_step],
@@ -487,6 +512,35 @@ def apply_pres():
                     quasi.next_quasis[0] = 0
     return altered
 
+def skip_searches():
+    global quasis
+    altered = False
+    for quasi in quasis:
+        if type(quasi)==State:
+            step = quasis[quasi.step]
+            instruction = quasis[step.instruction]
+            command = instruction.command
+            if step.is_found and command in ['LOAD','STORE']:
+                for symbol in quasi.transitions:
+                    quasi2 = quasis[quasi.transitions[symbol][2]]
+                    if type(quasi2)==State:
+                        step2 = quasis[quasi2.step]
+                        if not step2.is_found and step.variable==step2.variable:
+                            instruction2 = quasis[step2.instruction]
+                            command2 = instruction2.command
+                            if command2 in ['LOAD','STORE'] and instruction.big==instruction2.big:
+                                if instruction.read:
+                                    quasi.transitions[symbol][2] = quasi2.transitions[0][2]
+                                else:
+                                    quasi3 = quasis[list(quasi2.transitions.values())[0][2]]
+                                    quasi.transitions[symbol] = quasi3.transitions[symbol]
+                                altered = True
+    return altered
+                        
+                        
+                    
+
+
 def find_state(acc,step):
     global quasis
     if type(quasis[step])==Step:
@@ -526,9 +580,8 @@ def merge_links():
             for j,state2 in enumerate(quasis):
                 if j>k:
                     if type(state2)==State:
-                        if state1.transitions==state2.transitions:
+                        if equal_states(k,j):
                             quasis[j]=None
-                            print('merge',j,k)
                             replace_links(j,k)
                             return True
     return False
@@ -547,6 +600,7 @@ def compile_add():
         if more_pres:
             more_pres = apply_pres()
     stitch_acc()
+    skip_searches()
     more_merges = True
     while more_merges:
         more_merges = merge_links()
