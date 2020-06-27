@@ -242,6 +242,7 @@ def find_next_function(lines,k,label):
         else:
             if type(lines[j])==Label and lines[j].name==label:
                 label='null'
+    return find_next_function(lines,k+1,'null')
 
 def parse_files():
     global functions
@@ -587,9 +588,9 @@ def merge_links():
     return False
 					
 
-def compile_add():
+def compile_function(function_call):
     global quasis, used_states
-    function = LineParser.line.parse('RECP A B C').value
+    function = LineParser.line.parse(function_call).value
     evaluate_function_call(function)
     instructions2steps()
     steps2states()
