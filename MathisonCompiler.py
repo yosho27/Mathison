@@ -90,7 +90,7 @@ class Instruction:
         self.imm = imm
         self.loadto = loadto
 
-    def __str__(self):
+    def __repr__(self):
         result = 'Instruction(' + self.command
         if self.read:
             result+='NEXT'
@@ -155,7 +155,7 @@ def equal_states(k,j):
                 (transition1[2]==transition2[2] or transition1[2]==k and transition2[2]==j)):
             return False
     return True
-            
+    
         
 @dataclass(frozen=True,eq=True)
 class Symbol:
@@ -164,6 +164,10 @@ class Symbol:
 
     def __repr__(self):
         return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
+
+    def get_char(self):
+        global order
+        return order[(order.index(self.symbol)+self.offset)%len(order)]
 
 class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
@@ -300,18 +304,32 @@ def evaluate_function_call(function_call):
             index = len(quasis)
             argsdict = dict(zip(function.params,function_call.args))
             quasis += [None]*len(function.lines)
+            replacements = []
             for k,line in enumerate(function.lines):
                 if type(line)==FunctionCall:
                     new_function = functioncall2instruction(line.apply(index,argsdict))
                     quasis[index+k] = new_function
                     if type(new_function)==FunctionCall:
-                        replace_links(index+k,len(quasis))
+                        new_index = len(quasis)
                         evaluate_function_call(new_function)
+                        new_function.next_quasis = [new_index]
                 elif type(line)==End:
                     if line.is_start:
-                        quasis[index+k] = line.apply(index)
+                        quasis[index+k] = End(True,[index+line.next_quasis[0]])                        
                     else:
                         quasis[index+k] = End(False,function_call.next_quasis)
+
+def remove_ends():
+    global quasis
+    altered = False
+    for quasi in quasis:
+        if quasi and quasi.next_quasis:
+            for k in range(len(quasi.next_quasis)):
+                quasi2 = quasis[quasi.next_quasis[k]]
+                if type(quasi2)!=Instruction and quasi2.next_quasis:
+                    quasi.next_quasis[k] = quasi2.next_quasis[0]
+                    altered = True
+    return altered
 
 def parse(text):
     global quasis
@@ -369,6 +387,7 @@ def get_found_transitions(n_step,acc):
     elif command in more_transitions.keys():
         if acc in more_transitions[command].keys():
             transitions = more_transitions[command][acc]
+            transitions = {symbol:transitions[symbol][:] for symbol in transitions}
         else:
             return None,None
     #"Other primitive commands" except SEZ
@@ -482,7 +501,7 @@ def apply_posts():
                                 transition[1] = quasi2.map_[(transition[1],)][0]
                             transition[2] = quasi2.next_quasis[0]                            
                             altered = True
-                elif type(quasi2)==End and quasi2.next_quasis:
+                elif type(quasi2) in [FunctionCall,End] and quasi2.next_quasis:
                     transition[2] = quasi2.next_quasis[0]
                     altered = True
     return altered
@@ -504,8 +523,8 @@ def apply_pres():
                                 if quasi.command=='MAP':
                                     if (quasi2.acc,) in quasi.map_:
                                         mapping = quasi.map_[(quasi2.acc,)]
-                                        transition[0] = str(mapping[0]) + transition[0][1:]
-                                        transition[1] = mapping[1]
+                                        transition[0] = str(mapping[1]) + transition[0][1:]
+                                        transition[1] = mapping[0]
                                 else:
                                     transition[0] = str(quasi.imm) + transition[0][1:]
                             altered = True
@@ -589,9 +608,13 @@ def merge_links():
 					
 
 def compile_function(function_call):
-    global quasis, used_states
+    global quasis, used_states, directions
+    quasis = []
     function = LineParser.line.parse(function_call).value
     evaluate_function_call(function)
+    more_ends = True
+    while more_ends:
+        more_ends = remove_ends()
     instructions2steps()
     steps2states()
     more_posts,more_pres = True,True
@@ -607,9 +630,92 @@ def compile_function(function_call):
         more_merges = merge_links()
     used_states = {0}
     find_successors(0)
+    directions = {}
+    print_founds()
+    print_searches()
+    #for k,quasi in enumerate(quasis):
+    #    if k in used_states:
+    #        print(k,quasi)
+
+def to_char(symbol):
+    if symbol==None:
+        return '*'
+    elif type(symbol)==Symbol:
+        return symbol.get_char()[-1]
+    elif symbol=='0\'':
+        return '2'
+    elif symbol=='1\'':
+        return '3'
+    else:
+        return symbol[-1]
+
+def add_initial():
+    initial = quasis[0].next_quasis[0]
+    state = quasis[initial]
+    symbol = list(state.transitions.keys())[0]
+    next_var = order.index(symbol.symbol)+symbol.offset
+    directions[initial] = {'*' if next_var==0 else 'r'}
+
+def print_founds():
+    add_initial()
     for k,quasi in enumerate(quasis):
-        if k in used_states:
-            print(k,quasi)
+        if k in used_states and type(quasi)==State:
+            step = quasis[quasi.step]
+            if step.is_found:
+                for symbol in quasi.transitions:
+                    transition = quasi.transitions[symbol]
+                    quasi2 = quasis[transition[2]]
+                    if type(quasi2)==State:
+                        step2 = quasis[quasi2.step]
+                        if step2.is_found:
+                            if quasi.direction>0:
+                                direction = 'r'
+                            else:
+                                direction = 'l'
+                        else:
+                            symbol2 = list(quasi2.transitions.keys())[0]
+                            next_var = order.index(symbol2.symbol)+symbol2.offset
+                            if type(symbol)==Symbol:
+                                current_var = order.index(symbol.symbol)+symbol.offset
+                                if next_var<current_var:
+                                    direction = 'l'
+                                elif next_var>current_var:
+                                    direction = 'r'
+                                else:
+                                    direction = '*'
+                            else:
+                                current_var = order.index(step.variable)
+                                if next_var>current_var:
+                                    direction = 'r'
+                                else:
+                                    direction = 'l'
+                    else:
+                        direction = '*'
+                    print(k,
+                        to_char(symbol),
+                        to_char(transition[0]),
+                        direction,
+                        str(transition[2])+('' if step2.is_found else direction) if type(quasis[transition[2]])==State else 'halt')
+                    if not step2.is_found:
+                        if transition[2] in directions:
+                            directions[transition[2]].add(direction)
+                        else:
+                            directions[transition[2]] = {direction}
+
+def print_searches():
+    for search in directions:
+        for direction in directions[search]:
+            state = quasis[search]
+            for symbol in state.transitions:
+                transition = state.transitions[symbol]
+                next_direction = quasis[transition[2]].direction
+                print(str(search)+direction,
+                    to_char(list(state.transitions.keys())[0]),
+                    '*',
+                    'l' if next_direction<0 else 'r',
+                    transition[2])
+            print(str(search)+direction,'*','*',direction,'*')
 
 parse_files()
 link_lines()
+order = ['varr', 'V', 'N', 'P', 'S']

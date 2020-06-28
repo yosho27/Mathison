@@ -12,3 +12,7 @@ NOTs S
 JUMP start
 end:
 END
+
+FUNC TEST
+ADDIs A 3
+END
