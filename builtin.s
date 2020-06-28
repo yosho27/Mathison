@@ -36,6 +36,7 @@ LOADNEXT var0 ACC
 LOADNEXT var1 TEMP
 MAP map
 STORENEXT vard ACC
+JUMP start
 oob: 
 UNREAD var0
 UNREAD var1
@@ -79,6 +80,7 @@ LOADNEXT var0 ACC
 LOAD vard TEMP
 MAP map
 STORENEXT vard ACC
+JUMP start
 oob: 
 UNREAD var0
 UNREAD vard
