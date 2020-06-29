@@ -246,7 +246,7 @@ def find_next_function(lines,k,label):
         else:
             if type(lines[j])==Label and lines[j].name==label:
                 label='null'
-    return find_next_function(lines,k+1,'null')
+    return find_next_function(lines,k,'null')
 
 def parse_files():
     global functions
@@ -550,7 +550,7 @@ def skip_searches():
                             command2 = instruction2.command
                             if command2 in ['LOAD','STORE'] and instruction.big==instruction2.big:
                                 if instruction.read:
-                                    quasi.transitions[symbol][2] = quasi2.transitions[0][2]
+                                    quasi.transitions[symbol][2] = list(quasi2.transitions.values())[0][2]
                                 else:
                                     quasi3 = quasis[list(quasi2.transitions.values())[0][2]]
                                     quasi.transitions[symbol] = quasi3.transitions[symbol]
@@ -690,13 +690,14 @@ def print_founds():
                                 else:
                                     direction = 'l'
                     else:
+                        step2 = None
                         direction = '*'
                     print(k,
                         to_char(symbol),
                         to_char(transition[0]),
                         direction,
                         str(transition[2])+('' if step2.is_found else direction) if type(quasis[transition[2]])==State else 'halt')
-                    if not step2.is_found:
+                    if step2 and not step2.is_found:
                         if transition[2] in directions:
                             directions[transition[2]].add(direction)
                         else:

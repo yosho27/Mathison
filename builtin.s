@@ -1,4 +1,5 @@
 FUNC ADD vard var0 var1
+LOADI 0 ACC
 start:
 LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 1x0:1, 1x1:2}
@@ -15,6 +16,7 @@ END
 
 
 FUNC SUB vard var0 var1
+LOADI 0 ACC
 start:
 LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 3x0:3, 3x1:0}
@@ -45,6 +47,7 @@ END
 
 
 FUNC ADDs vard var0
+LOADI 0 ACC
 start:
 LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 1x0:1, 1x1:2}
@@ -60,6 +63,7 @@ END
 
 
 FUNC SUBs vard var0
+LOADI 0 ACC
 start:
 LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 3x0:3, 3x1:0}
@@ -136,6 +140,24 @@ ADDs vard var1
 shift:
 SLLs var1 0
 JUMP start
+oob:
+UNREAD var0
+END
+
+
+FUNC MULTo vard var0 var1
+start:
+LOADNEXT var0 ACC
+BRANCH shift add null null
+add:
+ADDs vard var1
+BRANCH shift oob null null
+shift:
+SLLs var1 0
+BRANCH start flow null null
+flow:
+LOADNEXT var0 ACC
+BRANCH flow oob null null
 oob:
 UNREAD var0
 END
