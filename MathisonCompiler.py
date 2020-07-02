@@ -553,7 +553,9 @@ def skip_searches():
                                     quasi.transitions[symbol][2] = list(quasi2.transitions.values())[0][2]
                                 else:
                                     quasi3 = quasis[list(quasi2.transitions.values())[0][2]]
-                                    quasi.transitions[symbol] = quasi3.transitions[symbol]
+                                    symbol3 = quasi.transitions[symbol][0]
+                                    symbol3 = symbol if symbol3==None else symbol3
+                                    quasi.transitions[symbol] = quasi3.transitions[symbol3]
                                 altered = True
     return altered
                         

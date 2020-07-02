@@ -9733,3 +9733,2583 @@ KeyboardInterrupt
 >>> quasis[0]
 End(is_start=True, next_quasis=[138])
 >>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> order = ['E','Q','varr','F','f','n','N']
+>>> compile_function('EULER')
+195 0 0 r 195
+195 1 0 r 195
+195 2 0 r 195
+195 3 0 r 195
+195 f f l 199l
+203 0 2 r 279r
+203 1 3 r 280r
+203 2 2 r 203
+203 3 3 r 203
+203 f f r 311r
+211 0 0 r 211
+211 1 1 r 211
+211 2 0 r 211
+211 3 1 r 211
+211 N N l 215l
+212 0 1 r 212
+212 1 0 r 211
+212 2 1 r 212
+212 3 0 r 211
+212 N * l 215l
+219 0 0 r 219
+219 1 1 r 231r
+219 N N * 231*
+235 0 2 l 239l
+235 1 3 l 240l
+235 2 2 r 235
+235 3 3 r 235
+235 E E l 255l
+243 0 2 r 255r
+243 1 2 r 255r
+243 2 2 r 243
+243 3 3 r 243
+243 N N * 255*
+244 0 3 r 255r
+244 1 3 r 255r
+244 2 2 r 244
+244 3 3 r 244
+244 N N * 255*
+259 0 0 r 259
+259 1 1 r 259
+259 2 0 r 259
+259 3 1 r 259
+259 E E l 263l
+267 0 0 r 267
+267 1 1 r 267
+267 2 0 r 267
+267 3 1 r 267
+267 N N l 191l
+283 0 2 l 295l
+283 1 2 l 295l
+283 2 2 r 283
+283 3 3 r 283
+283 n n l 295l
+284 0 3 l 295l
+284 1 3 l 295l
+284 2 2 r 284
+284 3 3 r 284
+284 n n l 295l
+299 0 0 r 299
+299 1 1 r 299
+299 2 0 r 299
+299 3 1 r 299
+299 f f * 303*
+307 0 0 r 307
+307 1 1 r 307
+307 2 0 r 307
+307 3 1 r 307
+307 n n * 311*
+315 0 2 l 319l
+315 1 3 l 334l
+315 2 2 r 315
+315 3 3 r 315
+315 N N l 325l
+323 0 0 r 323
+323 1 0 r 324
+323 2 0 r 323
+323 3 0 r 324
+323 n * * 311*
+324 0 1 r 323
+324 1 1 r 324
+324 2 1 r 323
+324 3 1 r 324
+324 n * * 311*
+329 0 0 r 329
+329 1 1 r 329
+329 2 0 r 329
+329 3 1 r 329
+329 N N l 207l
+337 0 2 l 341l
+337 1 3 l 342l
+337 2 2 r 337
+337 3 3 r 337
+337 n * l 357l
+338 0 2 l 342l
+338 1 3 l 343l
+338 2 2 r 338
+338 3 3 r 338
+338 n * l 357l
+345 0 2 r 333r
+345 1 3 r 333r
+345 2 2 r 345
+345 3 3 r 345
+345 f * * 357*
+346 0 3 r 333r
+346 1 2 r 334r
+346 2 2 r 346
+346 3 3 r 346
+346 f * * 357*
+347 0 2 r 334r
+347 1 3 r 334r
+347 2 2 r 347
+347 3 3 r 347
+347 f * * 357*
+361 0 0 r 361
+361 1 1 r 361
+361 2 0 r 361
+361 3 1 r 361
+361 n n l 365l
+369 0 0 r 369
+369 1 1 r 369
+369 2 0 r 369
+369 3 1 r 369
+369 f f * 319*
+231r N * r 235
+231r * * r *
+231* N * r 235
+231* * * * *
+199l F * r 203
+199l * * l *
+279r f * r 283
+279r * * r *
+280r f * r 284
+280r * * r *
+311r n * r 315
+311r * * r *
+311* n * r 315
+311* * * * *
+215l n * r 219
+215l * * l *
+239l n * r 243
+239l * * l *
+240l n * r 244
+240l * * l *
+255r N * r 259
+255r * * r *
+255* N * r 259
+255* * * * *
+255l N * r 259
+255l * * l *
+263l n * r 267
+263l * * l *
+191l F * r 195
+191l * * l *
+295l F * r 299
+295l * * l *
+303* f * r 307
+303* * * * *
+319* f * r 323
+319* * * * *
+319l f * r 323
+319l * * l *
+334r f * r 338
+334r * * r *
+334l f * r 338
+334l * * l *
+325l n * r 329
+325l * * l *
+207l n * r 212
+207l * * l *
+341l F * r 345
+341l * * l *
+342l F * r 346
+342l * * l *
+357* f * r 361
+357* * * * *
+357l f * r 361
+357l * * l *
+343l F * r 347
+343l * * l *
+333r f * r 337
+333r * * r *
+365l F * r 369
+365l * * l *
+>>> quasis[0]
+End(is_start=True, next_quasis=[231])
+>>> directions[231]
+{'r', '*'}
+>>> order
+['E', 'Q', 'varr', 'F', 'f', 'n', 'N']
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> order=['E', 'Q', 'varr', 'F', 'f', 'n', 'N']
+>>> compile_function('EULER')
+199 0 0 r 199
+199 1 0 r 199
+199 2 0 r 199
+199 3 0 r 199
+199 f f l 203l
+207 0 2 r 283r
+207 1 3 r 284r
+207 2 2 r 207
+207 3 3 r 207
+207 f f l 299l
+215 0 0 r 215
+215 1 1 r 215
+215 2 0 r 215
+215 3 1 r 215
+215 N N l 219l
+216 0 1 r 216
+216 1 0 r 215
+216 2 1 r 216
+216 3 0 r 215
+216 N * l 219l
+223 0 0 r 223
+223 1 1 l 203l
+223 N N l 377l
+231 0 0 r 231
+231 1 1 r 231
+231 2 0 r 231
+231 3 1 r 231
+231 E E l 235l
+232 0 1 r 231
+232 1 0 r 232
+232 2 1 r 231
+232 3 0 r 232
+232 E * * halt
+239 0 2 l 243l
+239 1 3 l 244l
+239 2 2 r 239
+239 3 3 r 239
+239 E E l 259l
+247 0 2 r 259r
+247 1 2 r 259r
+247 2 2 r 247
+247 3 3 r 247
+247 N N * 259*
+248 0 3 r 259r
+248 1 3 r 259r
+248 2 2 r 248
+248 3 3 r 248
+248 N N * 259*
+263 0 0 r 263
+263 1 1 r 263
+263 2 0 r 263
+263 3 1 r 263
+263 E E l 267l
+271 0 0 r 271
+271 1 1 r 271
+271 2 0 r 271
+271 3 1 r 271
+271 N N l 195l
+287 0 2 l 299l
+287 1 2 l 299l
+287 2 2 r 287
+287 3 3 r 287
+287 n n l 299l
+288 0 3 l 299l
+288 1 3 l 299l
+288 2 2 r 288
+288 3 3 r 288
+288 n n l 299l
+303 0 0 r 303
+303 1 1 r 303
+303 2 0 r 303
+303 3 1 r 303
+303 f f * 307*
+311 0 0 r 311
+311 1 1 r 311
+311 2 0 r 311
+311 3 1 r 311
+311 n n * 315*
+319 0 2 l 323l
+319 1 3 l 338l
+319 2 2 r 319
+319 3 3 r 319
+319 N N l 329l
+327 0 0 r 327
+327 1 0 r 328
+327 2 0 r 327
+327 3 0 r 328
+327 n n * 315*
+328 0 1 r 327
+328 1 1 r 328
+328 2 1 r 327
+328 3 1 r 328
+328 n * * 315*
+333 0 0 r 333
+333 1 1 r 333
+333 2 0 r 333
+333 3 1 r 333
+333 N N l 211l
+341 0 2 l 345l
+341 1 3 l 346l
+341 2 2 r 341
+341 3 3 r 341
+341 n * l 361l
+342 0 2 l 346l
+342 1 3 l 347l
+342 2 2 r 342
+342 3 3 r 342
+342 n * l 361l
+349 0 2 r 337r
+349 1 3 r 337r
+349 2 2 r 349
+349 3 3 r 349
+349 f f * 361*
+350 0 3 r 337r
+350 1 2 r 338r
+350 2 2 r 350
+350 3 3 r 350
+350 f f * 361*
+351 0 2 r 338r
+351 1 3 r 338r
+351 2 2 r 351
+351 3 3 r 351
+351 f f * 361*
+365 0 0 r 365
+365 1 1 r 365
+365 2 0 r 365
+365 3 1 r 365
+365 n n l 369l
+373 0 0 r 373
+373 1 1 r 373
+373 2 0 r 373
+373 3 1 r 373
+373 f f * 323*
+381 0 0 r 381
+381 1 0 r 381
+381 2 0 r 381
+381 3 0 r 381
+381 F F l 385l
+389 0 0 r 389
+389 1 0 r 390
+389 2 0 r 389
+389 3 0 r 390
+389 F F * 407*
+390 0 1 r 389
+390 1 1 r 390
+390 2 1 r 389
+390 3 1 r 390
+390 F * * 408*
+395 0 3 r 439r
+395 1 3 r 439r
+395 2 2 l 395
+395 3 3 l 395
+395 Q Q * 399*
+396 0 2 r 385r
+396 1 2 r 385r
+396 2 2 l 396
+396 3 3 l 396
+396 Q * * 400*
+398 0 3 r 439r
+398 1 3 r 439r
+398 2 2 l 398
+398 3 3 l 398
+398 Q Q * 402*
+403 0 0 r 403
+403 1 1 r 403
+403 2 0 r 403
+403 3 1 r 403
+403 r r l 479l
+404 0 0 r 404
+404 1 1 r 404
+404 2 0 r 404
+404 3 1 r 404
+404 r r l 480l
+406 0 0 r 406
+406 1 1 r 406
+406 2 0 r 406
+406 3 1 r 406
+406 r r l 482l
+411 0 2 r 415r
+411 1 3 r 416r
+411 2 2 l 411
+411 3 3 l 411
+411 r r * 423*
+412 0 2 r 415r
+412 1 3 r 416r
+412 2 2 l 412
+412 3 3 l 412
+412 r r * 424*
+419 0 2 l 407l
+419 1 3 l 424l
+419 2 2 l 419
+419 3 3 l 419
+419 F * l 423l
+420 0 2 l 426l
+420 1 3 l 407l
+420 2 2 l 420
+420 3 3 l 420
+420 F F l 424l
+427 0 0 r 427
+427 1 1 r 427
+427 2 0 r 427
+427 3 1 r 427
+427 F F * 431*
+428 0 0 r 428
+428 1 1 r 428
+428 2 0 r 428
+428 3 1 r 428
+428 F F * 432*
+430 0 0 r 430
+430 1 1 r 430
+430 2 0 r 430
+430 3 1 r 430
+430 F F * 434*
+435 0 0 r 435
+435 1 1 r 435
+435 2 0 r 435
+435 3 1 r 435
+435 f f l 391l
+436 0 0 r 436
+436 1 1 r 436
+436 2 0 r 436
+436 3 1 r 436
+436 f f l 392l
+438 0 0 r 438
+438 1 1 r 438
+438 2 0 r 438
+438 3 1 r 438
+438 f f l 394l
+443 0 2 l 447l
+443 1 3 l 448l
+443 2 2 r 443
+443 3 3 r 443
+443 f * l 463l
+444 0 2 l 448l
+444 1 3 l 448l
+444 2 2 r 444
+444 3 3 r 444
+444 f * l 463l
+451 0 2 r 439r
+451 1 3 r 440r
+451 2 2 r 451
+451 3 3 r 451
+451 F F * 463*
+452 0 3 r 439r
+452 1 2 r 439r
+452 2 2 r 452
+452 3 3 r 452
+452 F F * 463*
+467 0 0 r 467
+467 1 1 r 467
+467 2 0 r 467
+467 3 1 r 467
+467 f f l 471l
+475 0 0 r 475
+475 1 1 r 475
+475 2 0 r 475
+475 3 1 r 475
+475 F F l 385l
+483 0 2 l 487l
+483 1 3 l 488l
+483 2 2 r 483
+483 3 3 r 483
+483 r * l 503l
+484 0 2 l 488l
+484 1 3 l 489l
+484 2 2 r 484
+484 3 3 r 484
+484 r * l 503l
+486 0 2 l 490l
+486 1 3 l 490l
+486 2 2 r 486
+486 3 3 r 486
+486 r * l 503l
+491 0 2 r 479r
+491 1 3 r 479r
+491 2 2 r 491
+491 3 3 r 491
+491 Q Q * 503*
+492 0 3 r 479r
+492 1 2 r 480r
+492 2 2 r 492
+492 3 3 r 492
+492 Q Q * 503*
+493 0 2 r 480r
+493 1 3 r 480r
+493 2 2 r 493
+493 3 3 r 493
+493 Q Q * 503*
+494 0 3 r 480r
+494 1 3 r 480r
+494 2 2 r 494
+494 3 3 r 494
+494 Q Q * 503*
+507 0 0 r 507
+507 1 1 r 507
+507 2 0 r 507
+507 3 1 r 507
+507 r r l 511l
+515 0 0 r 515
+515 1 1 r 515
+515 2 0 r 515
+515 3 1 r 515
+515 Q Q r 227r
+235r N * r 239
+235r * * r *
+235l N * r 239
+235l * * l *
+203l F * r 207
+203l * * l *
+283r f * r 287
+283r * * r *
+284r f * r 288
+284r * * r *
+299l F * r 303
+299l * * l *
+219l n * r 223
+219l * * l *
+377l r * r 381
+377l * * l *
+243l n * r 247
+243l * * l *
+244l n * r 248
+244l * * l *
+259* N * r 263
+259* * * * *
+259r N * r 263
+259r * * r *
+259l N * r 263
+259l * * l *
+267l n * r 271
+267l * * l *
+195l F * r 199
+195l * * l *
+307* f * r 311
+307* * * * *
+315* n * r 319
+315* * * * *
+323* f * r 327
+323* * * * *
+323l f * r 327
+323l * * l *
+338r f * r 342
+338r * * r *
+338l f * r 342
+338l * * l *
+329l n * r 333
+329l * * l *
+211l n * r 216
+211l * * l *
+345l F * r 349
+345l * * l *
+346l F * r 350
+346l * * l *
+361* f * r 365
+361* * * * *
+361l f * r 365
+361l * * l *
+347l F * r 351
+347l * * l *
+337r f * r 341
+337r * * r *
+369l F * r 373
+369l * * l *
+385r r * r 390
+385r * * r *
+385l r * r 390
+385l * * l *
+407* F * l 411
+407* * * * *
+407l F * l 411
+407l * * l *
+408* F * l 412
+408* * * * *
+439r F * r 443
+439r * * r *
+399* Q * r 403
+399* * * * *
+400* Q * r 404
+400* * * * *
+402* Q * r 406
+402* * * * *
+479r Q * r 483
+479r * * r *
+479l Q * r 483
+479l * * l *
+480r Q * r 484
+480r * * r *
+480l Q * r 484
+480l * * l *
+482l Q * r 486
+482l * * l *
+415r f * l 419
+415r * * r *
+416r f * l 420
+416r * * r *
+423* r * r 427
+423* * * * *
+423l r * r 427
+423l * * l *
+424* r * r 428
+424* * * * *
+424l r * r 428
+424l * * l *
+426l r * r 430
+426l * * l *
+431* F * r 435
+431* * * * *
+432* F * r 436
+432* * * * *
+434* F * r 438
+434* * * * *
+391l r * l 395
+391l * * l *
+392l r * l 396
+392l * * l *
+394l r * l 398
+394l * * l *
+447l r * r 451
+447l * * l *
+448l r * r 452
+448l * * l *
+463* F * r 467
+463* * * * *
+463l F * r 467
+463l * * l *
+440r F * r 444
+440r * * r *
+471l r * r 475
+471l * * l *
+487l E * r 491
+487l * * l *
+488l E * r 492
+488l * * l *
+503* Q * r 507
+503* * * * *
+503l Q * r 507
+503l * * l *
+489l E * r 493
+489l * * l *
+490l E * r 494
+490l * * l *
+511l E * r 515
+511l * * l *
+227r N * r 232
+227r * * r *
+>>> quasis[0]
+End(is_start=True, next_quasis=[235])
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> order=['E', 'Q', 'varr', 'F', 'f', 'n', 'N']
+>>> compile_function('EULER')
+201 0 0 r 201
+201 1 0 r 201
+201 2 0 r 201
+201 3 0 r 201
+201 f f l 205l
+209 0 2 r 285r
+209 1 3 r 286r
+209 2 2 r 209
+209 3 3 r 209
+209 f f l 301l
+217 0 0 r 217
+217 1 1 r 217
+217 2 0 r 217
+217 3 1 r 217
+217 N N l 221l
+218 0 1 r 218
+218 1 0 r 217
+218 2 1 r 218
+218 3 0 r 217
+218 N N l 221l
+225 0 0 r 225
+225 1 1 l 205l
+225 N N l 379l
+233 0 0 r 233
+233 1 1 r 233
+233 2 0 r 233
+233 3 1 r 233
+233 E E l 237l
+234 0 1 r 233
+234 1 0 r 234
+234 2 1 r 233
+234 3 0 r 234
+234 E E * halt
+241 0 2 l 245l
+241 1 3 l 246l
+241 2 2 r 241
+241 3 3 r 241
+241 E E l 261l
+249 0 2 r 237r
+249 1 2 r 237r
+249 2 2 r 249
+249 3 3 r 249
+249 N N * 261*
+250 0 3 r 237r
+250 1 3 r 237r
+250 2 2 r 250
+250 3 3 r 250
+250 N N * 261*
+265 0 0 r 265
+265 1 1 r 265
+265 2 0 r 265
+265 3 1 r 265
+265 E E l 269l
+273 0 0 r 273
+273 1 1 r 273
+273 2 0 r 273
+273 3 1 r 273
+273 N N l 197l
+289 0 2 l 205l
+289 1 2 l 205l
+289 2 2 r 289
+289 3 3 r 289
+289 n n l 301l
+290 0 3 l 205l
+290 1 3 l 205l
+290 2 2 r 290
+290 3 3 r 290
+290 n n l 301l
+305 0 0 r 305
+305 1 1 r 305
+305 2 0 r 305
+305 3 1 r 305
+305 f f * 309*
+313 0 0 r 313
+313 1 1 r 313
+313 2 0 r 313
+313 3 1 r 313
+313 n n * 317*
+321 0 2 l 325l
+321 1 3 l 340l
+321 2 2 r 321
+321 3 3 r 321
+321 N N l 331l
+329 0 0 r 329
+329 1 0 r 330
+329 2 0 r 329
+329 3 0 r 330
+329 n n * 317*
+330 0 1 r 329
+330 1 1 r 330
+330 2 1 r 329
+330 3 1 r 330
+330 n n * 317*
+335 0 0 r 335
+335 1 1 r 335
+335 2 0 r 335
+335 3 1 r 335
+335 N N l 213l
+343 0 2 l 347l
+343 1 3 l 348l
+343 2 2 r 343
+343 3 3 r 343
+343 n n l 363l
+344 0 2 l 348l
+344 1 3 l 349l
+344 2 2 r 344
+344 3 3 r 344
+344 n n l 363l
+351 0 2 r 339r
+351 1 3 r 339r
+351 2 2 r 351
+351 3 3 r 351
+351 f f * 363*
+352 0 3 r 339r
+352 1 2 r 340r
+352 2 2 r 352
+352 3 3 r 352
+352 f f * 363*
+353 0 2 r 340r
+353 1 3 r 340r
+353 2 2 r 353
+353 3 3 r 353
+353 f f * 363*
+367 0 0 r 367
+367 1 1 r 367
+367 2 0 r 367
+367 3 1 r 367
+367 n n l 371l
+375 0 0 r 375
+375 1 1 r 375
+375 2 0 r 375
+375 3 1 r 375
+375 f f * 325*
+383 0 0 r 383
+383 1 0 r 383
+383 2 0 r 383
+383 3 0 r 383
+383 F F l 387l
+391 0 0 r 391
+391 1 0 r 392
+391 2 0 r 391
+391 3 0 r 392
+391 F * * 409*
+392 0 1 r 391
+392 1 1 r 392
+392 2 1 r 391
+392 3 1 r 392
+392 F * * 410*
+397 0 3 r 441r
+397 1 3 r 441r
+397 2 2 l 397
+397 3 3 l 397
+397 Q Q * 401*
+398 0 2 r 387r
+398 1 2 r 387r
+398 2 2 l 398
+398 3 3 l 398
+398 Q Q * 402*
+400 0 3 r 441r
+400 1 3 r 441r
+400 2 2 l 400
+400 3 3 l 400
+400 Q Q * 404*
+405 0 0 r 405
+405 1 1 r 405
+405 2 0 r 405
+405 3 1 r 405
+405 r r l 481l
+406 0 0 r 406
+406 1 1 r 406
+406 2 0 r 406
+406 3 1 r 406
+406 r r l 482l
+408 0 0 r 408
+408 1 1 r 408
+408 2 0 r 408
+408 3 1 r 408
+408 r r l 484l
+413 0 2 r 417r
+413 1 3 r 418r
+413 2 2 l 413
+413 3 3 l 413
+413 r r * 425*
+414 0 2 r 417r
+414 1 3 r 418r
+414 2 2 l 414
+414 3 3 l 414
+414 r r * 426*
+421 0 2 l 409l
+421 1 3 l 426l
+421 2 2 l 421
+421 3 3 l 421
+421 F F l 425l
+422 0 2 l 428l
+422 1 3 l 409l
+422 2 2 l 422
+422 3 3 l 422
+422 F F l 426l
+429 0 0 r 429
+429 1 1 r 429
+429 2 0 r 429
+429 3 1 r 429
+429 F F * 433*
+430 0 0 r 430
+430 1 1 r 430
+430 2 0 r 430
+430 3 1 r 430
+430 F F * 434*
+432 0 0 r 432
+432 1 1 r 432
+432 2 0 r 432
+432 3 1 r 432
+432 F F * 436*
+437 0 0 r 437
+437 1 1 r 437
+437 2 0 r 437
+437 3 1 r 437
+437 f f l 393l
+438 0 0 r 438
+438 1 1 r 438
+438 2 0 r 438
+438 3 1 r 438
+438 f f l 394l
+440 0 0 r 440
+440 1 1 r 440
+440 2 0 r 440
+440 3 1 r 440
+440 f f l 396l
+445 0 2 l 449l
+445 1 3 l 450l
+445 2 2 r 445
+445 3 3 r 445
+445 f f l 465l
+446 0 2 l 450l
+446 1 3 l 450l
+446 2 2 r 446
+446 3 3 r 446
+446 f f l 465l
+453 0 2 r 441r
+453 1 3 r 442r
+453 2 2 r 453
+453 3 3 r 453
+453 F F * 465*
+454 0 3 r 441r
+454 1 2 r 441r
+454 2 2 r 454
+454 3 3 r 454
+454 F F * 465*
+469 0 0 r 469
+469 1 1 r 469
+469 2 0 r 469
+469 3 1 r 469
+469 f f l 473l
+477 0 0 r 477
+477 1 1 r 477
+477 2 0 r 477
+477 3 1 r 477
+477 F F l 387l
+485 0 2 l 489l
+485 1 3 l 490l
+485 2 2 r 485
+485 3 3 r 485
+485 r r l 505l
+486 0 2 l 490l
+486 1 3 l 491l
+486 2 2 r 486
+486 3 3 r 486
+486 r r l 505l
+488 0 2 l 492l
+488 1 3 l 492l
+488 2 2 r 488
+488 3 3 r 488
+488 r r l 505l
+493 0 2 r 481r
+493 1 3 r 481r
+493 2 2 r 493
+493 3 3 r 493
+493 Q Q * 505*
+494 0 3 r 481r
+494 1 2 r 482r
+494 2 2 r 494
+494 3 3 r 494
+494 Q Q * 505*
+495 0 2 r 482r
+495 1 3 r 482r
+495 2 2 r 495
+495 3 3 r 495
+495 Q Q * 505*
+496 0 3 r 482r
+496 1 3 r 482r
+496 2 2 r 496
+496 3 3 r 496
+496 Q Q * 505*
+509 0 0 r 509
+509 1 1 r 509
+509 2 0 r 509
+509 3 1 r 509
+509 r r l 513l
+517 0 0 r 517
+517 1 1 r 517
+517 2 0 r 517
+517 3 1 r 517
+517 Q Q r 229r
+237r N * r 241
+237r * * r *
+237l N * r 241
+237l * * l *
+205l F * r 209
+205l * * l *
+285r f * r 289
+285r * * r *
+286r f * r 290
+286r * * r *
+301l F * r 305
+301l * * l *
+221l n * r 225
+221l * * l *
+379l r * r 383
+379l * * l *
+245l n * r 249
+245l * * l *
+246l n * r 250
+246l * * l *
+261* N * r 265
+261* * * * *
+261l N * r 265
+261l * * l *
+269l n * r 273
+269l * * l *
+197l F * r 201
+197l * * l *
+309* f * r 313
+309* * * * *
+317* n * r 321
+317* * * * *
+325* f * r 329
+325* * * * *
+325l f * r 329
+325l * * l *
+340r f * r 344
+340r * * r *
+340l f * r 344
+340l * * l *
+331l n * r 335
+331l * * l *
+213l n * r 218
+213l * * l *
+347l F * r 351
+347l * * l *
+348l F * r 352
+348l * * l *
+363* f * r 367
+363* * * * *
+363l f * r 367
+363l * * l *
+349l F * r 353
+349l * * l *
+339r f * r 343
+339r * * r *
+371l F * r 375
+371l * * l *
+387r r * r 392
+387r * * r *
+387l r * r 392
+387l * * l *
+409* F * l 413
+409* * * * *
+409l F * l 413
+409l * * l *
+410* F * l 414
+410* * * * *
+441r F * r 445
+441r * * r *
+401* Q * r 405
+401* * * * *
+402* Q * r 406
+402* * * * *
+404* Q * r 408
+404* * * * *
+481r Q * r 485
+481r * * r *
+481l Q * r 485
+481l * * l *
+482r Q * r 486
+482r * * r *
+482l Q * r 486
+482l * * l *
+484l Q * r 488
+484l * * l *
+417r f * l 421
+417r * * r *
+418r f * l 422
+418r * * r *
+425* r * r 429
+425* * * * *
+425l r * r 429
+425l * * l *
+426* r * r 430
+426* * * * *
+426l r * r 430
+426l * * l *
+428l r * r 432
+428l * * l *
+433* F * r 437
+433* * * * *
+434* F * r 438
+434* * * * *
+436* F * r 440
+436* * * * *
+393l r * l 397
+393l * * l *
+394l r * l 398
+394l * * l *
+396l r * l 400
+396l * * l *
+449l r * r 453
+449l * * l *
+450l r * r 454
+450l * * l *
+465* F * r 469
+465* * * * *
+465l F * r 469
+465l * * l *
+442r F * r 446
+442r * * r *
+473l r * r 477
+473l * * l *
+489l E * r 493
+489l * * l *
+490l E * r 494
+490l * * l *
+505* Q * r 509
+505* * * * *
+505l Q * r 509
+505l * * l *
+491l E * r 495
+491l * * l *
+492l E * r 496
+492l * * l *
+513l E * r 517
+513l * * l *
+229r N * r 234
+229r * * r *
+>>> quasis[0]
+End(is_start=True, next_quasis=[237])
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> order=['E', 'Q', 'varr', 'F', 'f', 'n', 'N']
+>>> compile_function('EULER')
+204 0 0 r 204
+204 1 0 r 204
+204 2 0 r 204
+204 3 0 r 204
+204 f f l 208l
+212 0 2 r 296r
+212 1 3 r 297r
+212 2 2 r 212
+212 3 3 r 212
+212 f f l 312l
+220 0 0 r 220
+220 1 0 r 220
+220 2 0 r 220
+220 3 0 r 220
+220 f f r 328r
+228 0 0 r 228
+228 1 1 r 228
+228 2 0 r 228
+228 3 1 r 228
+228 N N l 232l
+229 0 1 r 229
+229 1 0 r 228
+229 2 1 r 229
+229 3 0 r 228
+229 N * l 232l
+236 0 0 r 236
+236 1 1 l 208l
+236 N N l 390l
+244 0 0 r 244
+244 1 1 r 244
+244 2 0 r 244
+244 3 1 r 244
+244 E E l 248l
+245 0 1 r 244
+245 1 0 r 245
+245 2 1 r 244
+245 3 0 r 245
+245 E E * halt
+252 0 2 l 256l
+252 1 3 l 257l
+252 2 2 r 252
+252 3 3 r 252
+252 E E l 272l
+260 0 2 r 248r
+260 1 2 r 248r
+260 2 2 r 260
+260 3 3 r 260
+260 N N * 272*
+261 0 3 r 248r
+261 1 3 r 248r
+261 2 2 r 261
+261 3 3 r 261
+261 N N * 272*
+276 0 0 r 276
+276 1 1 r 276
+276 2 0 r 276
+276 3 1 r 276
+276 E E l 280l
+284 0 0 r 284
+284 1 1 r 284
+284 2 0 r 284
+284 3 1 r 284
+284 N N l 200l
+300 0 2 l 208l
+300 1 2 l 208l
+300 2 2 r 300
+300 3 3 r 300
+300 n n l 312l
+301 0 3 l 208l
+301 1 3 l 208l
+301 2 2 r 301
+301 3 3 r 301
+301 n n l 312l
+316 0 0 r 316
+316 1 1 r 316
+316 2 0 r 316
+316 3 1 r 316
+316 f f * 320*
+324 0 0 r 324
+324 1 1 r 324
+324 2 0 r 324
+324 3 1 r 324
+324 n n l 216l
+332 0 2 l 336l
+332 1 3 l 351l
+332 2 2 r 332
+332 3 3 r 332
+332 N N l 342l
+340 0 0 r 340
+340 1 0 r 341
+340 2 0 r 340
+340 3 0 r 341
+340 n * * 328*
+341 0 1 r 340
+341 1 1 r 341
+341 2 1 r 340
+341 3 1 r 341
+341 n * * 328*
+346 0 0 r 346
+346 1 1 r 346
+346 2 0 r 346
+346 3 1 r 346
+346 N N l 224l
+354 0 2 l 358l
+354 1 3 l 359l
+354 2 2 r 354
+354 3 3 r 354
+354 n * l 374l
+355 0 2 l 359l
+355 1 3 l 360l
+355 2 2 r 355
+355 3 3 r 355
+355 n * l 374l
+362 0 2 r 350r
+362 1 3 r 350r
+362 2 2 r 362
+362 3 3 r 362
+362 f f * 374*
+363 0 3 r 350r
+363 1 2 r 351r
+363 2 2 r 363
+363 3 3 r 363
+363 f f * 374*
+364 0 2 r 351r
+364 1 3 r 351r
+364 2 2 r 364
+364 3 3 r 364
+364 f f * 374*
+378 0 0 r 378
+378 1 1 r 378
+378 2 0 r 378
+378 3 1 r 378
+378 n n l 382l
+386 0 0 r 386
+386 1 1 r 386
+386 2 0 r 386
+386 3 1 r 386
+386 f f * 336*
+394 0 0 r 394
+394 1 0 r 394
+394 2 0 r 394
+394 3 0 r 394
+394 F F l 398l
+402 0 0 r 402
+402 1 0 r 403
+402 2 0 r 402
+402 3 0 r 403
+402 F F * 420*
+403 0 1 r 402
+403 1 1 r 403
+403 2 1 r 402
+403 3 1 r 403
+403 F * * 421*
+408 0 3 r 452r
+408 1 3 r 452r
+408 2 2 l 408
+408 3 3 l 408
+408 Q Q * 412*
+409 0 2 r 398r
+409 1 2 r 398r
+409 2 2 l 409
+409 3 3 l 409
+409 Q * * 413*
+411 0 3 r 452r
+411 1 3 r 452r
+411 2 2 l 411
+411 3 3 l 411
+411 Q Q * 415*
+416 0 0 r 416
+416 1 1 r 416
+416 2 0 r 416
+416 3 1 r 416
+416 r r l 492l
+417 0 0 r 417
+417 1 1 r 417
+417 2 0 r 417
+417 3 1 r 417
+417 r r l 493l
+419 0 0 r 419
+419 1 1 r 419
+419 2 0 r 419
+419 3 1 r 419
+419 r r l 495l
+424 0 2 r 428r
+424 1 3 r 429r
+424 2 2 l 424
+424 3 3 l 424
+424 r r * 436*
+425 0 2 r 428r
+425 1 3 r 429r
+425 2 2 l 425
+425 3 3 l 425
+425 r r * 437*
+432 0 2 l 420l
+432 1 3 l 437l
+432 2 2 l 432
+432 3 3 l 432
+432 F * l 436l
+433 0 2 l 439l
+433 1 3 l 420l
+433 2 2 l 433
+433 3 3 l 433
+433 F F l 437l
+440 0 0 r 440
+440 1 1 r 440
+440 2 0 r 440
+440 3 1 r 440
+440 F F * 444*
+441 0 0 r 441
+441 1 1 r 441
+441 2 0 r 441
+441 3 1 r 441
+441 F F * 445*
+443 0 0 r 443
+443 1 1 r 443
+443 2 0 r 443
+443 3 1 r 443
+443 F F * 447*
+448 0 0 r 448
+448 1 1 r 448
+448 2 0 r 448
+448 3 1 r 448
+448 f f l 404l
+449 0 0 r 449
+449 1 1 r 449
+449 2 0 r 449
+449 3 1 r 449
+449 f f l 405l
+451 0 0 r 451
+451 1 1 r 451
+451 2 0 r 451
+451 3 1 r 451
+451 f f l 407l
+456 0 2 l 460l
+456 1 3 l 461l
+456 2 2 r 456
+456 3 3 r 456
+456 f * l 476l
+457 0 2 l 461l
+457 1 3 l 461l
+457 2 2 r 457
+457 3 3 r 457
+457 f * l 476l
+464 0 2 r 452r
+464 1 3 r 453r
+464 2 2 r 464
+464 3 3 r 464
+464 F F * 476*
+465 0 3 r 452r
+465 1 2 r 452r
+465 2 2 r 465
+465 3 3 r 465
+465 F F * 476*
+480 0 0 r 480
+480 1 1 r 480
+480 2 0 r 480
+480 3 1 r 480
+480 f f l 484l
+488 0 0 r 488
+488 1 1 r 488
+488 2 0 r 488
+488 3 1 r 488
+488 F F l 398l
+496 0 2 l 500l
+496 1 3 l 501l
+496 2 2 r 496
+496 3 3 r 496
+496 r * l 516l
+497 0 2 l 501l
+497 1 3 l 502l
+497 2 2 r 497
+497 3 3 r 497
+497 r * l 516l
+499 0 2 l 503l
+499 1 3 l 503l
+499 2 2 r 499
+499 3 3 r 499
+499 r * l 516l
+504 0 2 r 492r
+504 1 3 r 492r
+504 2 2 r 504
+504 3 3 r 504
+504 Q Q * 516*
+505 0 3 r 492r
+505 1 2 r 493r
+505 2 2 r 505
+505 3 3 r 505
+505 Q Q * 516*
+506 0 2 r 493r
+506 1 3 r 493r
+506 2 2 r 506
+506 3 3 r 506
+506 Q Q * 516*
+507 0 3 r 493r
+507 1 3 r 493r
+507 2 2 r 507
+507 3 3 r 507
+507 Q Q * 516*
+520 0 0 r 520
+520 1 1 r 520
+520 2 0 r 520
+520 3 1 r 520
+520 r r l 524l
+528 0 0 r 528
+528 1 1 r 528
+528 2 0 r 528
+528 3 1 r 528
+528 Q Q r 240r
+248r N * r 252
+248r * * r *
+248l N * r 252
+248l * * l *
+208l F * r 212
+208l * * l *
+296r f * r 300
+296r * * r *
+297r f * r 301
+297r * * r *
+312l F * r 316
+312l * * l *
+328r n * r 332
+328r * * r *
+328* n * r 332
+328* * * * *
+232l n * r 236
+232l * * l *
+390l r * r 394
+390l * * l *
+256l n * r 260
+256l * * l *
+257l n * r 261
+257l * * l *
+272l N * r 276
+272l * * l *
+272* N * r 276
+272* * * * *
+280l n * r 284
+280l * * l *
+200l F * r 204
+200l * * l *
+320* f * r 324
+320* * * * *
+216l F * r 220
+216l * * l *
+336l f * r 340
+336l * * l *
+336* f * r 340
+336* * * * *
+351l f * r 355
+351l * * l *
+351r f * r 355
+351r * * r *
+342l n * r 346
+342l * * l *
+224l n * r 229
+224l * * l *
+358l F * r 362
+358l * * l *
+359l F * r 363
+359l * * l *
+374l f * r 378
+374l * * l *
+374* f * r 378
+374* * * * *
+360l F * r 364
+360l * * l *
+350r f * r 354
+350r * * r *
+382l F * r 386
+382l * * l *
+398l r * r 403
+398l * * l *
+398r r * r 403
+398r * * r *
+420l F * l 424
+420l * * l *
+420* F * l 424
+420* * * * *
+421* F * l 425
+421* * * * *
+452r F * r 456
+452r * * r *
+412* Q * r 416
+412* * * * *
+413* Q * r 417
+413* * * * *
+415* Q * r 419
+415* * * * *
+492l Q * r 496
+492l * * l *
+492r Q * r 496
+492r * * r *
+493l Q * r 497
+493l * * l *
+493r Q * r 497
+493r * * r *
+495l Q * r 499
+495l * * l *
+428r f * l 432
+428r * * r *
+429r f * l 433
+429r * * r *
+436l r * r 440
+436l * * l *
+436* r * r 440
+436* * * * *
+437l r * r 441
+437l * * l *
+437* r * r 441
+437* * * * *
+439l r * r 443
+439l * * l *
+444* F * r 448
+444* * * * *
+445* F * r 449
+445* * * * *
+447* F * r 451
+447* * * * *
+404l r * l 408
+404l * * l *
+405l r * l 409
+405l * * l *
+407l r * l 411
+407l * * l *
+460l r * r 464
+460l * * l *
+461l r * r 465
+461l * * l *
+476l F * r 480
+476l * * l *
+476* F * r 480
+476* * * * *
+453r F * r 457
+453r * * r *
+484l r * r 488
+484l * * l *
+500l E * r 504
+500l * * l *
+501l E * r 505
+501l * * l *
+516l Q * r 520
+516l * * l *
+516* Q * r 520
+516* * * * *
+502l E * r 506
+502l * * l *
+503l E * r 507
+503l * * l *
+524l E * r 528
+524l * * l *
+240r N * r 245
+240r * * r *
+>>> quasis[0]
+End(is_start=True, next_quasis=[248])
+>>> len(used_states)
+122
+>>> len(order)
+7
+>>> 122-16
+106
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py o
+Traceback (most recent call last):
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 720, in <module>
+    link_lines()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 289, in link_lines
+    quasi.next_quasis = [find_next_function(lines,k+1,'null'),find_next_function(lines,k+1,'oob')]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  [Previous line repeated 988 more times]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 242, in find_next_function
+    for j in range(k,len(lines)):
+RecursionError: maximum recursion depth exceeded in comparison
+>>> len(functions)
+15
+>>> functions[-1]
+FunctionHeader(command='EULER', params=[], lines=[End(is_start=True, next_quasis=[]), Label(name='next'), FunctionCall(command='BOLs', args=['n', 'N', {(0, 0): (0,), (0, 1): (0,), (1, 0): (1,), (1, 1): (1,)}], next_quasis=None), FunctionCall(command='ZEROs', args=['F', 0], next_quasis=None), FunctionCall(command='LOAD', args=['F', 1], next_quasis=None), Label(name='start'), FunctionCall(command='BOLs', args=['f', 'F', {(0, 0): (0,), (0, 1): (0,), (1, 0): (1,), (1, 1): (1,)}], next_quasis=None), FunctionCall(command='ZEROs', args=['F', 0], next_quasis=None), FunctionCall(command='MULT', args=['F', 'n', 'f'], next_quasis=None), FunctionCall(command='SUBIs', args=['n', 1], next_quasis=None), FunctionCall(command='SEZ', args=['n'], next_quasis=None), FunctionCall(command='BRANCH', args=['start', 'recip', 'null', 'null'], next_quasis=None), Label(name='recip'), FunctionCall(command='RECP', args=['Q', 'varr', 'F'], next_quasis=None), FunctionCall(command='ADDs', args=['E', 'Q'], next_quasis=None), FunctionCall(command='ADDIs', args=['N', 1], next_quasis=None), FunctionCall(command='BRANCH', args=['next', 'end', 'null', 'null'], next_quasis=None), Label(name='end'), End(is_start=False, next_quasis=[])])
+>>> function[10]
+Traceback (most recent call last):
+  File "<pyshell#947>", line 1, in <module>
+    function[10]
+NameError: name 'function' is not defined
+>>> functions[10]
+FunctionHeader(command='MULTo', params=['vard', 'var0', 'var1'], lines=[End(is_start=True, next_quasis=[2]), Label(name='start'), FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=[3, 14]), FunctionCall(command='BRANCH', args=['shift', 'add', 'null', 'null'], next_quasis=[8, 5, 5, 5]), Label(name='add'), FunctionCall(command='ADDs', args=['vard', 'var1'], next_quasis=[6]), FunctionCall(command='BRANCH', args=['shift', 'oob', 'null', 'null'], next_quasis=[8, 14, 8, 8]), Label(name='shift'), FunctionCall(command='SLLs', args=['var1', 0], next_quasis=[9]), FunctionCall(command='BRANCH', args=['start', 'flow', 'null', 'null'], next_quasis=[2, 11, 11, 11]), Label(name='flow'), FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=[12, 14]), FunctionCall(command='BRANCH', args=['flow', 'oob', 'null', 'null'], next_quasis=[11, 14, 14, 14]), Label(name='oob'), FunctionCall(command='UNREAD', args=['var0'], next_quasis=[15]), End(is_start=False, next_quasis=[])])
+>>> functions[13]
+FunctionHeader(command='TEST', params=[], lines=[End(is_start=True, next_quasis=[1]), FunctionCall(command='MULTo', args=['D', 'A', 'B'], next_quasis=[2]), FunctionCall(command='STORE', args=['S', 'ACC'], next_quasis=None), End(is_start=False, next_quasis=[])])
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+Traceback (most recent call last):
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 720, in <module>
+    link_lines()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 289, in link_lines
+    quasi.next_quasis = [find_next_function(lines,k+1,'null'),find_next_function(lines,k+1,'oob')]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  [Previous line repeated 988 more times]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 242, in find_next_function
+    for j in range(k,len(lines)):
+RecursionError: maximum recursion depth exceeded in comparison
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+ADD
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,)}], next_quasis=None)
+4 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,), (2, 0): (2,), (2, 1): (3,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+SUB
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (3, 0): (3,), (3, 1): (0,)}], next_quasis=None)
+4 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (3,), (1, 0): (1,), (1, 1): (0,), (3, 0): (3,), (3, 1): (2,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+BOL
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=['map'], next_quasis=None)
+5 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+6 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+7 Label(name='oob')
+8 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+ADDs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,)}], next_quasis=None)
+4 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,), (2, 0): (2,), (2, 1): (3,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+12 End(is_start=False, next_quasis=[])
+SUBs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (3, 0): (3,), (3, 1): (0,)}], next_quasis=None)
+4 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (3,), (1, 0): (1,), (1, 1): (0,), (3, 0): (3,), (3, 1): (2,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+12 End(is_start=False, next_quasis=[])
+BOLs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=['map'], next_quasis=None)
+5 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+6 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+7 Label(name='oob')
+8 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+10 End(is_start=False, next_quasis=[])
+SLL
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='LOADNEXTBIG', args=['var0', 'TEMP'], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='LOADNEXTBIG', args=['var0', 'ACC'], next_quasis=None)
+4 FunctionCall(command='STORENEXTBIG', args=['vard', 'ACC'], next_quasis=None)
+5 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='LOADI', args=['imm', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='STORENEXTBIG', args=['vard', 'TEMP'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+SRL
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+4 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+5 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='LOADI', args=['imm', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+SLT
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXTBIG', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOADNEXTBIG', args=['var1', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (3,), (1, 1): (0,)}], next_quasis=None)
+5 FunctionCall(command='BRANCH', args=['start', 'oob', 'null', 'oob'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+8 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+9 End(is_start=False, next_quasis=[])
+MULT
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='BRANCH', args=['shift', 'add', 'null', 'null'], next_quasis=None)
+4 Label(name='add')
+5 FunctionCall(command='ADDs', args=['vard', 'var1'], next_quasis=None)
+6 Label(name='shift')
+7 FunctionCall(command='SLLs', args=['var1', 0], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+MULTo
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='BRANCH', args=['shift', 'add', 'null', 'null'], next_quasis=None)
+4 Label(name='add')
+5 FunctionCall(command='ADDs', args=['vard', 'var1'], next_quasis=None)
+6 FunctionCall(command='BRANCH', args=['shift', 'oob', 'null', 'null'], next_quasis=None)
+7 Label(name='shift')
+8 FunctionCall(command='SLLs', args=['var1', 0], next_quasis=None)
+9 FunctionCall(command='BRANCH', args=['start', 'flow', 'null', 'null'], next_quasis=None)
+10 Label(name='flow')
+11 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+12 FunctionCall(command='BRANCH', args=['flow', 'oob', 'null', 'null'], next_quasis=None)
+13 Label(name='oob')
+14 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+15 End(is_start=False, next_quasis=[])
+RECP
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='ZEROs', args=['varr', 0], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='SLLs', args=['varr', 1], next_quasis=None)
+4 FunctionCall(command='SLT', args=['varr', 'var0'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0,): (0, 1), (1,): (1, 0), (3,): (0, 1)}], next_quasis=None)
+6 FunctionCall(command='STORENEXTBIG', args=['vard', 'TEMP'], next_quasis=None)
+7 FunctionCall(command='BRANCH', args=['sub', 'start', 'null', 'null'], next_quasis=None)
+8 Label(name='sub')
+9 FunctionCall(command='SUBs', args=['varr', 'var0'], next_quasis=None)
+10 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+11 Label(name='oob')
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+PI
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='RECP', args=['V', 'varr', 'N'], next_quasis=None)
+3 FunctionCall(command='LOAD', args=['S', 'ACC'], next_quasis=None)
+4 FunctionCall(command='BRANCH', args=['add', 'null', 'null', 'null'], next_quasis=None)
+5 FunctionCall(command='COMPs', args=['V'], next_quasis=None)
+6 Label(name='add')
+7 FunctionCall(command='ADDs', args=['P', 'V'], next_quasis=None)
+8 FunctionCall(command='ADDIs', args=['N', 2], next_quasis=None)
+9 FunctionCall(command='BRANCH', args=['null', 'end', 'null', 'null'], next_quasis=None)
+10 FunctionCall(command='NOTs', args=['S'], next_quasis=None)
+11 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+12 Label(name='end')
+13 End(is_start=False, next_quasis=[])
+TEST
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='MULTo', args=['D', 'A', 'B'], next_quasis=None)
+2 FunctionCall(command='STORE', args=['S', 'ACC'], next_quasis=None)
+Traceback (most recent call last):
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 722, in <module>
+    link_lines()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 291, in link_lines
+    quasi.next_quasis = [find_next_function(lines,k+1,'null'),find_next_function(lines,k+1,'oob')]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  [Previous line repeated 988 more times]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 242, in find_next_function
+    for j in range(k,len(lines)):
+RecursionError: maximum recursion depth exceeded in comparison
+>>> functions[-2]
+FunctionHeader(command='TEST', params=[], lines=[End(is_start=True, next_quasis=[1]), FunctionCall(command='MULTo', args=['D', 'A', 'B'], next_quasis=[2]), FunctionCall(command='STORE', args=['S', 'ACC'], next_quasis=None), End(is_start=False, next_quasis=[])])
+>>> find_next_function(functions[-2].lines,3,'null')
+3
+>>> find_next_function(functions[-2].lines,3,'oob')
+Traceback (most recent call last):
+  File "<pyshell#952>", line 1, in <module>
+    find_next_function(functions[-2].lines,3,'oob')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 249, in find_next_function
+    return find_next_function(lines,k+1,'null')
+  [Previous line repeated 989 more times]
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 242, in find_next_function
+    for j in range(k,len(lines)):
+RecursionError: maximum recursion depth exceeded in comparison
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+ADD
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,)}], next_quasis=None)
+4 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,), (2, 0): (2,), (2, 1): (3,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+SUB
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (3, 0): (3,), (3, 1): (0,)}], next_quasis=None)
+4 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (3,), (1, 0): (1,), (1, 1): (0,), (3, 0): (3,), (3, 1): (2,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+BOL
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOADNEXT', args=['var1', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=['map'], next_quasis=None)
+5 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+6 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+7 Label(name='oob')
+8 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+ADDs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,)}], next_quasis=None)
+4 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (1,), (1, 1): (2,), (2, 0): (2,), (2, 1): (3,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+12 End(is_start=False, next_quasis=[])
+SUBs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+3 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (3, 0): (3,), (3, 1): (0,)}], next_quasis=None)
+4 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (3,), (1, 0): (1,), (1, 1): (0,), (3, 0): (3,), (3, 1): (2,)}], next_quasis=None)
+6 FunctionCall(command='MAP', args=[{(0,): (0, 0), (1,): (0, 1), (2,): (1, 0), (3,): (1, 1)}], next_quasis=None)
+7 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+12 End(is_start=False, next_quasis=[])
+BOLs
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOAD', args=['vard', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=['map'], next_quasis=None)
+5 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+6 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+7 Label(name='oob')
+8 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+10 End(is_start=False, next_quasis=[])
+SLL
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='LOADNEXTBIG', args=['var0', 'TEMP'], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='LOADNEXTBIG', args=['var0', 'ACC'], next_quasis=None)
+4 FunctionCall(command='STORENEXTBIG', args=['vard', 'ACC'], next_quasis=None)
+5 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='LOADI', args=['imm', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='STORENEXTBIG', args=['vard', 'TEMP'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+SRL
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='LOADNEXT', args=['var0', 'TEMP'], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+4 FunctionCall(command='STORENEXT', args=['vard', 'ACC'], next_quasis=None)
+5 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='LOADI', args=['imm', 'TEMP'], next_quasis=None)
+8 FunctionCall(command='STORENEXT', args=['vard', 'TEMP'], next_quasis=None)
+9 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+10 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+SLT
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXTBIG', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='LOADNEXTBIG', args=['var1', 'TEMP'], next_quasis=None)
+4 FunctionCall(command='MAP', args=[{(0, 0): (0,), (0, 1): (1,), (1, 0): (3,), (1, 1): (0,)}], next_quasis=None)
+5 FunctionCall(command='BRANCH', args=['start', 'oob', 'null', 'oob'], next_quasis=None)
+6 Label(name='oob')
+7 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+8 FunctionCall(command='UNREAD', args=['var1'], next_quasis=None)
+9 End(is_start=False, next_quasis=[])
+MULT
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='BRANCH', args=['shift', 'add', 'null', 'null'], next_quasis=None)
+4 Label(name='add')
+5 FunctionCall(command='ADDs', args=['vard', 'var1'], next_quasis=None)
+6 Label(name='shift')
+7 FunctionCall(command='SLLs', args=['var1', 0], next_quasis=None)
+8 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+9 Label(name='oob')
+10 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+11 End(is_start=False, next_quasis=[])
+MULTo
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+3 FunctionCall(command='BRANCH', args=['shift', 'add', 'null', 'null'], next_quasis=None)
+4 Label(name='add')
+5 FunctionCall(command='ADDs', args=['vard', 'var1'], next_quasis=None)
+6 FunctionCall(command='BRANCH', args=['shift', 'oob', 'null', 'null'], next_quasis=None)
+7 Label(name='shift')
+8 FunctionCall(command='SLLs', args=['var1', 0], next_quasis=None)
+9 FunctionCall(command='BRANCH', args=['start', 'flow', 'null', 'null'], next_quasis=None)
+10 Label(name='flow')
+11 FunctionCall(command='LOADNEXT', args=['var0', 'ACC'], next_quasis=None)
+12 FunctionCall(command='BRANCH', args=['flow', 'oob', 'null', 'null'], next_quasis=None)
+13 Label(name='oob')
+14 FunctionCall(command='UNREAD', args=['var0'], next_quasis=None)
+15 End(is_start=False, next_quasis=[])
+RECP
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='ZEROs', args=['varr', 0], next_quasis=None)
+2 Label(name='start')
+3 FunctionCall(command='SLLs', args=['varr', 1], next_quasis=None)
+4 FunctionCall(command='SLT', args=['varr', 'var0'], next_quasis=None)
+5 FunctionCall(command='MAP', args=[{(0,): (0, 1), (1,): (1, 0), (3,): (0, 1)}], next_quasis=None)
+6 FunctionCall(command='STORENEXTBIG', args=['vard', 'TEMP'], next_quasis=None)
+7 FunctionCall(command='BRANCH', args=['sub', 'start', 'null', 'null'], next_quasis=None)
+8 Label(name='sub')
+9 FunctionCall(command='SUBs', args=['varr', 'var0'], next_quasis=None)
+10 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+11 Label(name='oob')
+12 FunctionCall(command='UNREAD', args=['vard'], next_quasis=None)
+13 End(is_start=False, next_quasis=[])
+PI
+0 End(is_start=True, next_quasis=[])
+1 Label(name='start')
+2 FunctionCall(command='RECP', args=['V', 'varr', 'N'], next_quasis=None)
+3 FunctionCall(command='LOAD', args=['S', 'ACC'], next_quasis=None)
+4 FunctionCall(command='BRANCH', args=['add', 'null', 'null', 'null'], next_quasis=None)
+5 FunctionCall(command='COMPs', args=['V'], next_quasis=None)
+6 Label(name='add')
+7 FunctionCall(command='ADDs', args=['P', 'V'], next_quasis=None)
+8 FunctionCall(command='ADDIs', args=['N', 2], next_quasis=None)
+9 FunctionCall(command='BRANCH', args=['null', 'end', 'null', 'null'], next_quasis=None)
+10 FunctionCall(command='NOTs', args=['S'], next_quasis=None)
+11 FunctionCall(command='JUMP', args=['start'], next_quasis=None)
+12 Label(name='end')
+13 End(is_start=False, next_quasis=[])
+TEST
+0 End(is_start=True, next_quasis=[])
+1 FunctionCall(command='MULTo', args=['D', 'A', 'B'], next_quasis=None)
+2 FunctionCall(command='STORE', args=['S', 'ACC'], next_quasis=None)
+3 End(is_start=False, next_quasis=[])
+EULER
+0 End(is_start=True, next_quasis=[])
+1 Label(name='next')
+2 FunctionCall(command='BOLs', args=['n', 'N', {(0, 0): (0,), (0, 1): (0,), (1, 0): (1,), (1, 1): (1,)}], next_quasis=None)
+3 FunctionCall(command='ZEROs', args=['F', 0], next_quasis=None)
+4 FunctionCall(command='LOAD', args=['F', 1], next_quasis=None)
+5 Label(name='start')
+6 FunctionCall(command='BOLs', args=['f', 'F', {(0, 0): (0,), (0, 1): (0,), (1, 0): (1,), (1, 1): (1,)}], next_quasis=None)
+7 FunctionCall(command='ZEROs', args=['F', 0], next_quasis=None)
+8 FunctionCall(command='MULT', args=['F', 'n', 'f'], next_quasis=None)
+9 FunctionCall(command='SUBIs', args=['n', 1], next_quasis=None)
+10 FunctionCall(command='SEZ', args=['n'], next_quasis=None)
+11 FunctionCall(command='BRANCH', args=['start', 'recip', 'null', 'null'], next_quasis=None)
+12 Label(name='recip')
+13 FunctionCall(command='RECP', args=['Q', 'varr', 'F'], next_quasis=None)
+14 FunctionCall(command='ADDs', args=['E', 'Q'], next_quasis=None)
+15 FunctionCall(command='ADDIs', args=['N', 1], next_quasis=None)
+16 FunctionCall(command='BRANCH', args=['next', 'end', 'null', 'null'], next_quasis=None)
+17 Label(name='end')
+18 End(is_start=False, next_quasis=[])
+>>> compile_function('TEST')
+Traceback (most recent call last):
+  File "<pyshell#953>", line 1, in <module>
+    compile_function('TEST')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 629, in compile_function
+    skip_searches()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 555, in skip_searches
+    quasi.transitions[symbol][2] = quasi2.transitions[0][2]
+KeyError: 0
+>>> compile_function('PI')
+112 0 0 l 240l
+112 1 1 l 116l
+112 2 2 r 112
+112 3 3 r 112
+Traceback (most recent call last):
+  File "<pyshell#954>", line 1, in <module>
+    compile_function('PI')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 636, in compile_function
+    print_founds()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 700, in print_founds
+    str(transition[2])+('' if step2.is_found else direction) if type(quasis[transition[2]])==State else 'halt')
+KeyboardInterrupt
+>>> compile_function('TEST')
+Traceback (most recent call last):
+  File "<pyshell#955>", line 1, in <module>
+    compile_function('TEST')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 629, in compile_function
+    skip_searches()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 555, in skip_searches
+    quasi.transitions[symbol][2] = quasi2.transitions[0][2]
+KeyError: 0
+>>> len(quasis)
+131
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> compile_function('TEST')
+Traceback (most recent call last):
+  File "<pyshell#957>", line 1, in <module>
+    compile_function('TEST')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 634, in compile_function
+    print_founds()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 660, in print_founds
+    add_initial()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 656, in add_initial
+    next_var = order.index(symbol.symbol)+symbol.offset
+ValueError: 'A' is not in list
+>>> order = ['D','A','B','S']
+>>> compile_function('TEST')
+57 0 0 * halt
+Traceback (most recent call last):
+  File "<pyshell#959>", line 1, in <module>
+    compile_function('TEST')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 634, in compile_function
+    print_founds()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 699, in print_founds
+    if not step2.is_found:
+UnboundLocalError: local variable 'step2' referenced before assignment
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> order = ['D','A','B','S']
+>>> compile_function('TEST')
+57 0 0 * halt
+57 1 0 * halt
+57 2 2 r 57
+57 3 3 r 57
+57 D * * halt
+58 0 1 * halt
+58 1 1 * halt
+58 2 2 r 58
+58 3 3 r 58
+58 D * * halt
+65 0 2 r 69r
+65 1 3 r 92r
+65 2 2 r 65
+65 3 3 r 65
+65 B B l 83l
+73 0 0 r 73
+73 1 0 r 74
+73 2 0 r 73
+73 3 0 r 74
+73 S * l 61l
+74 0 1 r 73
+74 1 1 r 74
+74 2 1 r 73
+74 3 1 r 74
+74 S S l 76l
+79 0 2 r 79
+79 1 3 l 84l
+79 2 2 r 79
+79 3 3 r 79
+79 B B l 83l
+80 0 2 r 79
+80 1 3 l 84l
+80 2 2 r 80
+80 3 3 r 80
+80 B B l 84l
+87 0 0 r 87
+87 1 1 r 87
+87 2 0 r 87
+87 3 1 r 87
+87 B B r 53r
+88 0 0 r 88
+88 1 1 r 88
+88 2 0 r 88
+88 3 1 r 88
+88 B B r 54r
+95 0 2 l 99l
+95 1 3 l 100l
+95 2 2 r 95
+95 3 3 r 95
+95 S S l 115l
+96 0 2 l 100l
+96 1 3 l 101l
+96 2 2 r 96
+96 3 3 r 96
+96 S S l 116l
+103 0 2 r 91r
+103 1 3 r 91r
+103 2 2 r 103
+103 3 3 r 103
+103 A A r 115r
+104 0 3 r 91r
+104 1 2 r 92r
+104 2 2 r 104
+104 3 3 r 104
+104 A A r 116r
+105 0 2 r 92r
+105 1 3 r 92r
+105 2 2 r 105
+105 3 3 r 105
+105 A A r 115r
+119 0 0 r 119
+119 1 1 r 119
+119 2 0 r 119
+119 3 1 r 119
+119 S S l 123l
+120 0 0 r 120
+120 1 1 r 120
+120 2 0 r 120
+120 3 1 r 120
+120 S S l 124l
+127 0 0 r 127
+127 1 1 r 127
+127 2 0 r 127
+127 3 1 r 127
+127 A A r 69r
+128 0 0 r 128
+128 1 1 r 128
+128 2 0 r 128
+128 3 1 r 128
+128 A A * 84*
+61l A * r 65
+61l * * l *
+61r A * r 65
+61r * * r *
+69r B * r 73
+69r * * r *
+92r B * r 96
+92r * * r *
+83l A * r 87
+83l * * l *
+76l A * r 80
+76l * * l *
+84* A * r 88
+84* * * * *
+84l A * r 88
+84l * * l *
+53r S * r 57
+53r * * r *
+54r S * r 58
+54r * * r *
+99l D * r 103
+99l * * l *
+100l D * r 104
+100l * * l *
+115l B * r 119
+115l * * l *
+115r B * r 119
+115r * * r *
+101l D * r 105
+101l * * l *
+116l B * r 120
+116l * * l *
+116r B * r 120
+116r * * r *
+91r B * r 95
+91r * * r *
+123l D * r 127
+123l * * l *
+124l D * r 128
+124l * * l *
+>>> len(used_states)
+36
+>>> order
+['D', 'A', 'B', 'S']
+>>> quasis[0]
+End(is_start=True, next_quasis=[61])
+>>> directions[61]
+{'l', 'r'}
+>>> compile_function('MULT D A B')
+45 0 2 r 49r
+45 1 3 r 64r
+45 2 2 r 45
+45 3 3 r 45
+45 B B l 55l
+53 0 0 r 53
+53 1 0 r 54
+53 2 0 r 53
+53 3 0 r 54
+53 S * l 41l
+54 0 1 r 53
+54 1 1 r 54
+54 2 1 r 53
+54 3 1 r 54
+54 S S l 41l
+59 0 0 r 59
+59 1 1 r 59
+59 2 0 r 59
+59 3 1 r 59
+59 B B * halt
+67 0 2 l 71l
+67 1 3 l 72l
+67 2 2 r 67
+67 3 3 r 67
+67 S S l 87l
+68 0 2 l 72l
+68 1 3 l 73l
+68 2 2 r 68
+68 3 3 r 68
+68 S S l 87l
+75 0 2 r 63r
+75 1 3 r 63r
+75 2 2 r 75
+75 3 3 r 75
+75 A A r 87r
+76 0 3 r 63r
+76 1 2 r 64r
+76 2 2 r 76
+76 3 3 r 76
+76 A A r 87r
+77 0 2 r 64r
+77 1 3 r 64r
+77 2 2 r 77
+77 3 3 r 77
+77 A A r 87r
+91 0 0 r 91
+91 1 1 r 91
+91 2 0 r 91
+91 3 1 r 91
+91 S S l 95l
+99 0 0 r 99
+99 1 1 r 99
+99 2 0 r 99
+99 3 1 r 99
+99 A A r 49r
+41l A * r 45
+41l * * l *
+41r A * r 45
+41r * * r *
+49r B * r 53
+49r * * r *
+64r B * r 68
+64r * * r *
+55l A * r 59
+55l * * l *
+71l D * r 75
+71l * * l *
+72l D * r 76
+72l * * l *
+87l B * r 91
+87l * * l *
+87r B * r 91
+87r * * r *
+73l D * r 77
+73l * * l *
+63r B * r 67
+63r * * r *
+95l D * r 99
+95l * * l *
+>>> quasis[0]
+End(is_start=True, next_quasis=[41])
+>>> directions[41]
+{'l', 'r'}
+>>> compile_function('ADDS D A')
+Traceback (most recent call last):
+  File "<pyshell#969>", line 1, in <module>
+    compile_function('ADDS D A')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 632, in compile_function
+    find_successors(0)
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 585, in find_successors
+    if type(quasis[k])==End and quasis[k].next_quasis:
+IndexError: list index out of range
+>>> compile_function('ADDa D A')
+Traceback (most recent call last):
+  File "<pyshell#970>", line 1, in <module>
+    compile_function('ADDa D A')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 632, in compile_function
+    find_successors(0)
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 585, in find_successors
+    if type(quasis[k])==End and quasis[k].next_quasis:
+IndexError: list index out of range
+>>> compile_function('ADDs D A')
+27 0 2 l 31l
+27 1 3 l 32l
+27 2 2 r 27
+27 3 3 r 27
+27 B B l 47l
+28 0 2 l 32l
+28 1 3 l 33l
+28 2 2 r 28
+28 3 3 r 28
+28 B B l 47l
+35 0 2 r 23r
+35 1 3 r 23r
+35 2 2 r 35
+35 3 3 r 35
+35 A A * 47*
+36 0 3 r 23r
+36 1 2 r 24r
+36 2 2 r 36
+36 3 3 r 36
+36 A A * 47*
+37 0 2 r 24r
+37 1 3 r 24r
+37 2 2 r 37
+37 3 3 r 37
+37 A A * 47*
+51 0 0 r 51
+51 1 1 r 51
+51 2 0 r 51
+51 3 1 r 51
+51 B B l 55l
+59 0 0 r 59
+59 1 1 r 59
+59 2 0 r 59
+59 3 1 r 59
+59 A A * halt
+23r A * r 27
+23r * * r *
+31l D * r 35
+31l * * l *
+32l D * r 36
+32l * * l *
+47* A * r 51
+47* * * * *
+47l A * r 51
+47l * * l *
+33l D * r 37
+33l * * l *
+24r A * r 28
+24r * * r *
+55l D * r 59
+55l * * l *
+>>> quasis[0]
+End(is_start=True, next_quasis=[23])
+>>> directions[23]
+{'r'}
+>>> compile_function('MULT D A B')
+45 0 2 r 49r
+45 1 3 r 64r
+45 2 2 r 45
+45 3 3 r 45
+45 B B l 55l
+Traceback (most recent call last):
+  File "<pyshell#974>", line 1, in <module>
+    compile_function('MULT D A B')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 634, in compile_function
+    print_founds()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 699, in print_founds
+    str(transition[2])+('' if step2.is_found else direction) if type(quasis[transition[2]])==State else 'halt')
+KeyboardInterrupt
+>>> len(used_states)
+23
+>>> for k,quasi in enumerate(quasis):
+	if k in used_states:
+		print(k,quasi)
+
+		
+0 End(is_start=True, next_quasis=[41])
+11 End(is_start=False, next_quasis=None)
+41 State(step=25, acc=0, transitions={Sym('A'+0): [Sym('A'+0), 0, 45]}, direction=None)
+45 State(step=26, acc=0, transitions={'0': ["0'", 0, 49], '1': ["1'", 1, 64], "0'": ["0'", 0, 45], "1'": ["1'", 0, 45], Sym('A'+1): [Sym('A'+1), 0, 55]}, direction=1)
+49 State(step=27, acc=0, transitions={Sym('B'+0): [Sym('B'+0), 0, 53]}, direction=None)
+53 State(step=28, acc=0, transitions={'0': ['0', 0, 53], '1': ['0', 1, 54], "0'": ['0', 0, 53], "1'": ['0', 1, 54], Sym('B'+1): [None, 0, 41]}, direction=1)
+54 State(step=28, acc=1, transitions={'0': ['1', 0, 53], '1': ['1', 1, 54], "0'": ['1', 0, 53], "1'": ['1', 1, 54], Sym('B'+1): [Sym('B'+1), 1, 41]}, direction=1)
+55 State(step=29, acc=0, transitions={Sym('A'+0): [Sym('A'+0), 0, 59]}, direction=None)
+59 State(step=30, acc=0, transitions={'0': ['0', 0, 59], '1': ['1', 0, 59], "0'": ['0', 0, 59], "1'": ['1', 0, 59], Sym('A'+1): [Sym('A'+1), 0, 11]}, direction=1)
+63 State(step=31, acc=0, transitions={Sym('B'+0): [Sym('B'+0), 0, 67]}, direction=None)
+64 State(step=31, acc=1, transitions={Sym('B'+0): [Sym('B'+0), 1, 68]}, direction=None)
+67 State(step=32, acc=0, transitions={'0': ["0'", 0, 71], '1': ["1'", 1, 72], "0'": ["0'", 0, 67], "1'": ["1'", 0, 67], Sym('B'+1): [Sym('B'+1), 0, 87]}, direction=1)
+68 State(step=32, acc=1, transitions={'0': ["0'", 1, 72], '1': ["1'", 2, 73], "0'": ["0'", 1, 68], "1'": ["1'", 1, 68], Sym('B'+1): [Sym('B'+1), 1, 87]}, direction=1)
+71 State(step=33, acc=0, transitions={Sym('D'+0): [Sym('D'+0), 0, 75]}, direction=None)
+72 State(step=33, acc=1, transitions={Sym('D'+0): [Sym('D'+0), 1, 76]}, direction=None)
+73 State(step=33, acc=2, transitions={Sym('D'+0): [Sym('D'+0), 2, 77]}, direction=None)
+75 State(step=34, acc=0, transitions={'0': ["0'", 0, 63], '1': ["1'", 0, 63], "0'": ["0'", 0, 75], "1'": ["1'", 0, 75], Sym('D'+1): [Sym('D'+1), 0, 87]}, direction=1)
+76 State(step=34, acc=1, transitions={'0': ["1'", 0, 63], '1': ["0'", 1, 64], "0'": ["0'", 1, 76], "1'": ["1'", 1, 76], Sym('D'+1): [Sym('D'+1), 1, 87]}, direction=1)
+77 State(step=34, acc=2, transitions={'0': ["0'", 1, 64], '1': ["1'", 1, 64], "0'": ["0'", 2, 77], "1'": ["1'", 2, 77], Sym('D'+1): [Sym('D'+1), 2, 87]}, direction=1)
+87 State(step=37, acc=0, transitions={Sym('B'+0): [Sym('B'+0), 0, 91]}, direction=None)
+91 State(step=38, acc=0, transitions={'0': ['0', 0, 91], '1': ['1', 0, 91], "0'": ['0', 0, 91], "1'": ['1', 0, 91], Sym('B'+1): [Sym('B'+1), 0, 95]}, direction=1)
+95 State(step=39, acc=0, transitions={Sym('D'+0): [Sym('D'+0), 0, 99]}, direction=None)
+99 State(step=40, acc=0, transitions={'0': ['0', 0, 99], '1': ['1', 0, 99], "0'": ['0', 0, 99], "1'": ['1', 0, 99], Sym('D'+1): [Sym('D'+1), 0, 49]}, direction=1)
+>>> 
+ RESTART: C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py 
+>>> compile_function('TEST')
+Traceback (most recent call last):
+  File "<pyshell#980>", line 1, in <module>
+    compile_function('TEST')
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 634, in compile_function
+    print_founds()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 660, in print_founds
+    add_initial()
+  File "C:\Users\joshm\AppData\Local\Programs\Python\Python37-32\Mathison\MathisonCompiler.py", line 656, in add_initial
+    next_var = order.index(symbol.symbol)+symbol.offset
+ValueError: 'A' is not in list
+>>> order = ['D','A','B','S']
+>>> compile_function('TEST')
+58 0 0 * halt
+58 1 0 * halt
+58 2 2 r 58
+58 3 3 r 58
+58 D D * halt
+59 0 1 * halt
+59 1 1 * halt
+59 2 2 r 59
+59 3 3 r 59
+59 D D * halt
+66 0 2 r 70r
+66 1 3 r 92r
+66 2 2 r 66
+66 3 3 r 66
+66 B B l 84l
+74 0 0 r 74
+74 1 0 r 75
+74 2 0 r 74
+74 3 0 r 75
+74 S S l 62l
+75 0 1 r 74
+75 1 1 r 75
+75 2 1 r 74
+75 3 1 r 75
+75 S S l 77l
+80 0 2 r 80
+80 1 3 l 85l
+80 2 2 r 80
+80 3 3 r 80
+80 B B l 84l
+81 0 2 r 80
+81 1 3 l 85l
+81 2 2 r 81
+81 3 3 r 81
+81 B B l 85l
+88 0 0 r 88
+88 1 1 r 88
+88 2 0 r 88
+88 3 1 r 88
+88 B B r 54r
+89 0 0 r 89
+89 1 1 r 89
+89 2 0 r 89
+89 3 1 r 89
+89 B B r 55r
+96 0 2 l 100l
+96 1 3 l 101l
+96 2 2 r 96
+96 3 3 r 96
+96 S S l 116l
+97 0 2 l 101l
+97 1 3 l 102l
+97 2 2 r 97
+97 3 3 r 97
+97 S S l 117l
+104 0 2 r 92r
+104 1 3 r 92r
+104 2 2 r 104
+104 3 3 r 104
+104 A A r 116r
+105 0 3 r 92r
+105 1 2 r 93r
+105 2 2 r 105
+105 3 3 r 105
+105 A A r 117r
+106 0 2 r 93r
+106 1 3 r 93r
+106 2 2 r 106
+106 3 3 r 106
+106 A A r 116r
+120 0 0 r 120
+120 1 1 r 120
+120 2 0 r 120
+120 3 1 r 120
+120 S S l 124l
+121 0 0 r 121
+121 1 1 r 121
+121 2 0 r 121
+121 3 1 r 121
+121 S S l 125l
+128 0 0 r 128
+128 1 1 r 128
+128 2 0 r 128
+128 3 1 r 128
+128 A A r 70r
+129 0 0 r 129
+129 1 1 r 129
+129 2 0 r 129
+129 3 1 r 129
+129 A A * 85*
+62l A * r 66
+62l * * l *
+62r A * r 66
+62r * * r *
+70r B * r 74
+70r * * r *
+92r B * r 96
+92r * * r *
+84l A * r 88
+84l * * l *
+77l A * r 81
+77l * * l *
+85l A * r 89
+85l * * l *
+85* A * r 89
+85* * * * *
+54r S * r 58
+54r * * r *
+55r S * r 59
+55r * * r *
+100l D * r 104
+100l * * l *
+101l D * r 105
+101l * * l *
+116l B * r 120
+116l * * l *
+116r B * r 120
+116r * * r *
+102l D * r 106
+102l * * l *
+117l B * r 121
+117l * * l *
+117r B * r 121
+117r * * r *
+93r B * r 97
+93r * * r *
+124l D * r 128
+124l * * l *
+125l D * r 129
+125l * * l *
+>>> quasis[0]
+End(is_start=True, next_quasis=[62])
+>>> directions[62]
+{'l', 'r'}
+>>> 

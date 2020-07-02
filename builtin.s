@@ -156,6 +156,7 @@ shift:
 SLLs var1 0
 BRANCH start flow null null
 flow:
+LOADI 0 ACC
 LOADNEXT var0 ACC
 BRANCH flow oob null null
 oob:
