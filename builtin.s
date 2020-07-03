@@ -9,6 +9,7 @@ MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 
+MAP {0:0, 1:1, 2:1, 3:1}
 UNREAD var0
 UNREAD var1
 UNREAD vard
@@ -26,6 +27,7 @@ MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 
+MAP {0:0, 1:1, 2:1, 3:1}
 UNREAD var0
 UNREAD var1
 UNREAD vard
@@ -57,6 +59,7 @@ MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 
+MAP {0:0, 1:1, 2:1, 3:1}
 UNREAD var0
 UNREAD vard
 END
@@ -73,6 +76,7 @@ MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 
+MAP {0:0, 1:1, 2:1, 3:1}
 UNREAD var0
 UNREAD vard
 END

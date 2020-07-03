@@ -674,7 +674,6 @@ def skip_searches():
                     next_symbol = transition[0] if transition[0] else symbol
                     state.transitions[symbol] = next_state.transitions[next_symbol]
                     altered = True
-                    print(k,symbol)
     return altered                        
                     
 
@@ -762,8 +761,7 @@ def compile_function(function_call):
     more_ends = True
     while more_ends:
         more_ends = remove_ends()
-    instructions2steps()
-    steps2states()
+    instructions2states()
     more_posts,more_pres = True,True
     while (more_posts or more_pres):
         if more_posts:
@@ -777,12 +775,11 @@ def compile_function(function_call):
         more_merges = merge_links()
     used_states = {0}
     find_successors(0)
-    directions = {}
-    print_founds()
-    print_searches()
-    #for k,quasi in enumerate(quasis):
-    #    if k in used_states:
-    #        print(k,quasi)
+    #directions = {}
+    #print_founds()
+    #print_searches()
+    #for k in sorted(used_states):
+    #    print(k,quasis[k])
 
 def to_char(symbol):
     if symbol==None:
