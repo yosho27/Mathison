@@ -129,7 +129,7 @@ class End:
 
 @dataclass
 class State:
-    step: int #refers to an index in quasis
+    instruction: int #refers to an index in quasis
     acc: int
     transitions: dict #{symbol:[symbol,acc,step)}
     direction: int #+1 or -1
@@ -218,7 +218,7 @@ class LineParser(TextParsers,whitespace=None):
     function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
     memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
     end = lit('END') > constant(End(False,[]))
-    instr = (
+    '''instr = (
       (memory_command &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','loadto'))
     | (lit('UNREAD','JUMP','NOTs','COMPs','SEZ') &s>> valid > create_args('vard'))
     | ('MAP' &s>> MapParser.map_ > create_args('map_'))
@@ -226,7 +226,7 @@ class LineParser(TextParsers,whitespace=None):
     | ('LOADI' &s>> (ImmParser.imm2 &s>> 'ACC' | ImmParser.imm1 &s>> 'TEMP') > create_args('imm','loadto'))
     | (lit('SLLs','SRLs','ZEROs') &s>> valid &s>> ImmParser.imm1 > create_args('vard','imm'))
     | (lit('SLL2s','SRL2s','ADDIs','SUBIs') &s>> valid &s>> ImmParser.imm2 > create_args('vard','imm'))
-       )
+       )'''
     line = end | label | function_header | function_call
 
 def find_next_instruction(k,label):
@@ -319,7 +319,41 @@ def evaluate_function_call(function_call):
                     else:
                         quasis[index+k] = End(False,function_call.next_quasis)
 
+def get_quasis(types=[FunctionCall,Instruction,State,End]):
+    global quasis
+    for k,quasi in enumerate(quasis):
+        if type(quasi) in types:
+            yield k,quasi
+
+def get_quasis_from(quasi,types=[FunctionCall,Instruction,State,End]):
+    global quasis
+    if type(quasi)==State and quasi.transitions:
+        for symbol,transition in quasi.transitions.items():
+            if type(quasis[transition[2]]) in types:
+                yield symbol,transition,quasis[transition[2]]
+            elif State in types:
+                yield from get_states_of(transition[2])
+    elif type(quasi) in [FunctionCall,Instruction,End] and quasi.next_quasis:
+        for k,next_quasi in enumerate(quasi.next_quasis):
+            if next_quasi:
+                if type(quasis[next_quasi]) in types:
+                    yield k,next_quasi,quasis[next_quasi]
+                elif State in types:
+                    yield from get_states_of(next_quasi)
+
 def remove_ends():
+    global quasis
+    altered = False
+    for _,quasi in get_quasis():
+        for k,_,next_quasi in get_quasis_from(quasi,[FunctionCall,End]):
+            try:
+                _,quasi.next_quasis[k],_ = next(get_quasis_from(next_quasi))
+                altered = True
+            except StopIteration:
+                pass                
+    return altered
+
+'''def remove_ends():
     global quasis
     altered = False
     for quasi in quasis:
@@ -329,24 +363,23 @@ def remove_ends():
                 if type(quasi2)!=Instruction and quasi2.next_quasis:
                     quasi.next_quasis[k] = quasi2.next_quasis[0]
                     altered = True
-    return altered
+    return altered'''
 
-def parse(text):
+'''def parse(text):
     global quasis
     lines = [line.strip() for line in text.split('\n')]
     quasis = [End(True,[])]+[LineParser.line.parse(line).value for line in lines if line]+[End(False,[])]
-    for k,quasi in enumerate(quasis):
-        if type(quasi)==Instruction:
-            if quasi.command in ['LOAD','STORE']:
-                quasi.next_quasis = [find_next_instruction(k+1,'null'),find_next_instruction(k+1,'oob')]
-            elif quasi.command=='JUMP':
-                quasi.next_quasis = [find_next_instruction(0,quasi.vard)]
-            elif quasi.command=='BRANCH':
-                quasi.next_quasis = [find_next_instruction(0,quasi.labels[j]) for j in range(4)]
-            else:
-                quasi.next_quasis = [find_next_instruction(k+1,'null')]
-        elif type(quasi)==End and quasi.is_start:
-            quasi.next_quasis = [find_next_instruction(0,'null')]
+    for k,quasi in get_quasis([Instruction]):
+        if quasi.command in ['LOAD','STORE']:
+            quasi.next_quasis = [find_next_instruction(k+1,'null'),find_next_instruction(k+1,'oob')]
+        elif quasi.command=='JUMP':
+            quasi.next_quasis = [find_next_instruction(0,quasi.vard)]
+        elif quasi.command=='BRANCH':
+            quasi.next_quasis = [find_next_instruction(0,quasi.labels[j]) for j in range(4)]
+        else:
+            quasi.next_quasis = [find_next_instruction(k+1,'null')]
+    for _,quasi in get_quasis([End]):
+        quasi.next_quasis = [find_next_instruction(0,'null')]'''
 
 def group_unreads():
     global quasis
@@ -373,8 +406,8 @@ def get_search_transitions(n_step,acc):
 
 def get_found_transitions(n_step,acc):
     global quasis
-    step = quasis[n_step]
-    instruction = quasis[step.instruction]
+    #step = quasis[n_step]
+    instruction = quasis[n_step]
     command = instruction.command
     transitions = None
     #ACC preserving commands
@@ -389,7 +422,7 @@ def get_found_transitions(n_step,acc):
             transitions = more_transitions[command][acc]
             transitions = {symbol:transitions[symbol][:] for symbol in transitions}
         else:
-            return None,None
+            return {},None
     #"Other primitive commands" except SEZ
     if command in ['SRLs','SRL2s']:
         direction = 0
@@ -399,12 +432,12 @@ def get_found_transitions(n_step,acc):
         for symbol in transitions:
             transitions[symbol] += [n_step]
         transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
-        transitions[Symbol(step.variable,direction)] = [None,acc,step.next_quasis[0]]
+        transitions[Symbol(instruction.vard,direction)] = [None,acc,instruction.next_quasis[0]]
         return transitions,2*direction-1
     #SEZ
     if command=='SEZ':
-        return {'0':['0',acc,n_step],'1':['1',0,step.next_quasis[0]],
-                     Symbol(step.variable,+1):[None,1,step.next_quasis[0]]},+1
+        return {'0':['0',acc,n_step],'1':['1',0,instruction.next_quasis[0]],
+                     Symbol(instruction.vard,+1):[None,1,instruction.next_quasis[0]]},+1
     #All LOAD and STORE commands
     use_temp = instruction.loadto=='TEMP'
     if command=='LOAD':
@@ -415,16 +448,16 @@ def get_found_transitions(n_step,acc):
         for symbol in transitions:
             if instruction.read:
                 transitions[symbol][0] += '\''
-            transitions[symbol] += [step.next_quasis[0]]
+            transitions[symbol] += [instruction.next_quasis[0]]
         transitions.update(
             {'0\'':['0\'',acc,n_step],'1\'':['1\'',acc,n_step],
-            Symbol(step.variable,1-instruction.big):[None,acc,step.next_quasis[1]]})
+            Symbol(instruction.vard,1-instruction.big):[None,acc,instruction.next_quasis[1]]})
         return transitions,1-2*instruction.big
     #UNREAD
     if command=='UNREAD':
         return {'0':['0',acc,n_step],'1':['1',acc,n_step],
                 '0\'':['0',acc,n_step],'1\'':['1',acc,n_step],
-                     Symbol(step.variable,+1):[None,acc,step.next_quasis[0]]},+1
+                     Symbol(instruction.vard,+1):[None,acc,instruction.next_quasis[0]]},+1
 
 def steps2states():
     global quasis
@@ -463,12 +496,22 @@ def instructions2steps():
             ]
             replace_links(k,indices[0])
 
+def instructions2states():
+    global quasis
+    for k,instr in get_quasis([Instruction]):
+        if instr.command in [
+                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ','UNREAD']:
+            for acc in range(4):
+                transitions,direction = get_found_transitions(k,acc)
+                quasis.append(State(instruction=k,acc=acc,transitions=transitions,direction=direction))
+                
+
 def validate_maps(map_):
     sizes = {(len(key),len(map_[key])) for key in map_}    
     assert len(sizes)==1
     return sizes.pop()
 
-def apply_posts():
+'''def apply_posts():
     global quasis
     altered = False
     for quasi in quasis:
@@ -504,9 +547,39 @@ def apply_posts():
                 elif type(quasi2) in [FunctionCall,End] and quasi2.next_quasis:
                     transition[2] = quasi2.next_quasis[0]
                     altered = True
+    return altered'''
+
+def apply_posts():
+    global quasis
+    altered = False
+    for _,state in get_quasis([State]):
+        instruction = quasis[state.instruction]
+        for symbol,transition,next_instr in get_quasis_from(state,[Instruction]):
+            state_change = -1
+            if next_instr.command=='JUMP':
+                state_change = 0
+            elif next_instr.command=='BRANCH':
+                state_change = transition[1]
+            elif next_instr.command=='LOADI' and next_instr.loadto=='ACC':
+                transition[1] = next_instr.imm
+                state_change = 0
+            elif next_instr.command=='MAP':
+                size = validate_maps(next_instr.map_)
+                if size==(2,1):
+                    assert instruction.command=='LOAD' and instruction.loadto=='TEMP'
+                    if (transition[1],int(symbol)) in next_instr.map_:
+                        transition[1] = next_instr.map_[(transition[1],int(symbol))][0]
+                    state_change = 0
+                elif size==(1,1):
+                    if (transition[1],) in next_instr.map_:
+                        transition[1] = next_instr.map_[(transition[1],)][0]             
+                    state_change = 0
+            if state_change>=0:
+                transition[2] = next_instr.next_quasis[state_change]
+                altered = True
     return altered
 
-def apply_pres():
+'''def apply_pres():
     global quasis
     altered = False
     for k,quasi in enumerate(quasis):
@@ -530,6 +603,31 @@ def apply_pres():
                             altered = True
                     replace_links(k,quasi.next_quasis[0])
                     quasi.next_quasis[0] = 0
+    return altered'''
+
+def get_states_of(instruction):
+    for k,state in get_quasis([State]):
+        if state.instruction == instruction:
+            yield k,state
+
+def apply_pres():
+    global quasis
+    altered = False
+    for k,instr in get_quasis([Instruction]):
+        if (instr.command=='MAP' and validate_maps(instr.map_)==(1,2) or
+                instr.command=='LOADI' and instr.loadto=='TEMP'):
+            for _,state in get_quasis_from(instr,[State]):
+                for symbol in ['0','1']:
+                    transition = state.transitions[symbol]
+                    if instr.command=='MAP' and (state.acc,) in instr.map_:
+                        mapping = instr.map_[(state.acc,)]
+                        transition[0] = str(mapping[1]) + transition[0][1:]
+                        transition[1] = mapping[0]
+                    else:
+                        transition[0] = str(instr.imm) + transition[0][1:]
+                altered = True
+            replace_links(k,instr.next_quasis[0])
+            instr.next_quasis[0] = 0
     return altered
 
 def skip_searches():
@@ -565,14 +663,14 @@ def skip_searches():
 
 def find_state(acc,step):
     global quasis
-    if type(quasis[step])==Step:
-        for k,quasi in enumerate(quasis):
-            if type(quasi)==State and quasi.acc==acc and quasi.step==step:
+    if type(quasis[step])==Instruction:
+        for k,state in get_states_of(step):
+            if state.acc==acc:
                 return k
     else:
         return step
 
-def stitch_acc():
+'''def stitch_acc():
     global quasis
     for quasi in quasis:
         if type(quasi)==End and quasi.is_start:
@@ -580,7 +678,15 @@ def stitch_acc():
         if type(quasi)==State:
             for symbol in quasi.transitions:
                 transition = quasi.transitions[symbol]
-                transition[2] = find_state(transition[1],transition[2])
+                transition[2] = find_state(transition[1],transition[2])'''
+
+def stitch_acc():
+    global quasis
+    quasis[0].next_quasis[0] = find_state(0,quasis[0].next_quasis[0])
+    for _,state in get_quasis([State]):
+        for _,transition,_ in get_quasis_from(state,[Instruction]):
+            transition[2] = find_state(transition[1],transition[2])
+            
 
 def find_successors(k):
     global quasis,used_states
@@ -613,6 +719,7 @@ def compile_function(function_call):
     global quasis, used_states, directions
     quasis = []
     function = LineParser.line.parse(function_call).value
+    function.next_quasis = [None]
     evaluate_function_call(function)
     more_ends = True
     while more_ends:
