@@ -630,7 +630,7 @@ def apply_pres():
             instr.next_quasis[0] = 0
     return altered
 
-def skip_searches():
+'''def skip_searches():
     global quasis
     altered = False
     for quasi in quasis:
@@ -655,9 +655,27 @@ def skip_searches():
                                     symbol3 = symbol if symbol3==None else symbol3
                                     quasi.transitions[symbol] = quasi3.transitions[symbol3]
                                 altered = True
-    return altered
+    return altered'''
                         
-                        
+
+def skip_searches():
+    global quasis
+    altered = False
+    for k,state in get_quasis([State]):
+        instruction = quasis[state.instruction]
+        command = instruction.command
+        if command in ['LOAD','STORE'] and not instruction.read:
+            for symbol,transition,next_state in get_quasis_from(state,[State]):
+                next_instruction = quasis[next_state.instruction]
+                if (k!=transition[2] and
+                        instruction.vard==next_instruction.vard and                            
+                        next_instruction.command in ['LOAD','STORE'] and
+                        instruction.big==next_instruction.big):
+                    next_symbol = transition[0] if transition[0] else symbol
+                    state.transitions[symbol] = next_state.transitions[next_symbol]
+                    altered = True
+                    print(k,symbol)
+    return altered                        
                     
 
 
@@ -688,7 +706,7 @@ def stitch_acc():
             transition[2] = find_state(transition[1],transition[2])
             
 
-def find_successors(k):
+'''def find_successors(k):
     global quasis,used_states
     if type(quasis[k])==End and quasis[k].next_quasis:
         for j in quasis[k].next_quasis:
@@ -700,9 +718,19 @@ def find_successors(k):
             j = quasis[k].transitions[symbol][2]
             if not j in used_states:
                 used_states.add(j)
+                find_successors(j)'''
+
+def find_successors(k):
+    global quasis,used_states
+    for something in get_quasis_from(quasis[k],[End,State]):
+        j = something[1]
+        if type(j)==list:
+            j = j[2]
+        if not j in used_states:
+                used_states.add(j)
                 find_successors(j)
 
-def merge_links():
+'''def merge_links():
     for k,state1 in enumerate(quasis):
         if type(state1)==State:
             for j,state2 in enumerate(quasis):
@@ -712,7 +740,17 @@ def merge_links():
                             quasis[j]=None
                             replace_links(j,k)
                             return True
-    return False
+    return False'''
+
+def merge_links():
+    altered = False
+    for k,state1 in get_quasis([State]):
+        for j,state2 in get_quasis([State]):
+            if j>k and equal_states(k,j):
+                quasis[j]=None
+                replace_links(j,k)
+                altered = True
+    return altered
 					
 
 def compile_function(function_call):
