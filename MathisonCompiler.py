@@ -138,10 +138,11 @@ def get_none_transition(state,symbol,k):
     if symbol in state.transitions:
         transition = state.transitions[symbol]
         if transition[0]==None:
-            transition[0] = symbol
+            return [symbol] + transition[1:]
+        else:
+            return transition
     else:
-        transition = [symbol,0,k]
-    return transition
+        return [symbol,0,k]
     
 
 def equal_states(k,j):
@@ -165,8 +166,7 @@ class Symbol:
     def __repr__(self):
         return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
 
-    def get_char(self):
-        global order
+    def get_char(self,order):
         return order[(order.index(self.symbol)+self.offset)%len(order)]
 
 class ImmParser(TextParsers,whitespace=None):
@@ -656,7 +656,12 @@ def apply_pres():
                                     quasi.transitions[symbol] = quasi3.transitions[symbol3]
                                 altered = True
     return altered'''
-                        
+
+def adjacent_bits(instruction,next_instruction):
+    return (instruction.command in ['LOAD','STORE'] and
+            next_instruction.command in ['LOAD','STORE'] and
+            instruction.vard==next_instruction.vard and
+            instruction.big==next_instruction.big)
 
 def skip_searches():
     global quasis
@@ -667,10 +672,7 @@ def skip_searches():
         if command in ['LOAD','STORE'] and not instruction.read:
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if (k!=transition[2] and
-                        instruction.vard==next_instruction.vard and                            
-                        next_instruction.command in ['LOAD','STORE'] and
-                        instruction.big==next_instruction.big):
+                if (k!=transition[2] and adjacent_bits(instruction,next_instruction)):
                     next_symbol = transition[0] if transition[0] else symbol
                     state.transitions[symbol] = next_state.transitions[next_symbol]
                     altered = True
@@ -752,8 +754,8 @@ def merge_links():
     return altered
 					
 
-def compile_function(function_call):
-    global quasis, used_states, directions
+def compile_function(function_call,order=None):
+    global quasis, used_states, directions, rules
     quasis = []
     function = LineParser.line.parse(function_call).value
     function.next_quasis = [None]
@@ -775,7 +777,10 @@ def compile_function(function_call):
         more_merges = merge_links()
     used_states = {0}
     find_successors(0)
-    #directions = {}
+    directions = {}
+    add_initial(order)
+    states2rules(order)
+    searches2rules(order)
     #print_founds()
     #print_searches()
     #for k in sorted(used_states):
@@ -793,12 +798,76 @@ def to_char(symbol):
     else:
         return symbol[-1]
 
-def add_initial():
+def sign2char(sign):
+    if sign<0:
+        return 'L'
+    elif sign>0:
+        return 'R'
+    else:
+        return ''
+
+def symbol2string(symbol,order):
+    if type(symbol)==Symbol:
+        return order[(order.index(symbol.symbol)+symbol.offset)%len(order)]
+    elif symbol==None:
+        return None
+    else:
+        return str(symbol)
+
+def add_initial(order):
+    _,k,state = next(get_quasis_from(quasis[0],[State]))
+    next_var = order.index(quasis[state.instruction].vard)+(state.direction<0)
+    directions[k] = {(next_var,sign2char(next_var))}
+
+def states2rules(order):
+    global rules
+    rules = {}
+    for k,state in get_quasis([State]):
+        if k in used_states:
+            instruction = quasis[state.instruction]
+            for symbol,transition,next_state in get_quasis_from(state,[State]):
+                next_instruction = quasis[next_state.instruction]
+                if (adjacent_bits(instruction,next_instruction) and instruction.read):                    
+                    rules[(str(k),symbol2string(symbol,order))] = (
+                        str(k),
+                        symbol2string(transition[0],order),
+                        sign2char(state.direction))
+                else:
+                    if type(symbol)==Symbol:
+                        current_var = order.index(symbol.symbol)+symbol.offset
+                    else:
+                        current_var = order.index(instruction.vard)+(
+                            instruction.command in ['LOAD','STORE'] and symbol in ['0','1'] or
+                            instruction.command=='SEZ' and symbol=='1')/2
+                    next_var = order.index(next_instruction.vard)+(next_state.direction<0)
+                    direction = sign2char(next_var-current_var)
+                    rules[(str(k),symbol2string(symbol,order))] = (
+                             str(k)+direction,
+                             symbol2string(transition[0],order),
+                             direction if direction else sign2char(next_state.direction))
+                    if not transition[2] in directions:
+                        directions[transition[2]] = set()
+                    directions[transition[2]].add((next_var,direction))
+            for symbol,transition,end in get_quasis_from(state,[End]):
+                rules[(str(k),symbol2string(symbol,order))] = (
+                    'halt',
+                    symbol2string(transition[0],order),
+                    '')
+
+def searches2rules(order):
+    for k,search in directions.items():
+        for var,d in search:
+            if d:
+                rules[(str(k)+d,None)] = (str(k)+d,None,d)
+                rules[(str(k)+d,order[var])] = (str(k),None,quasis[k].direction)
+                    
+
+'''def add_initial():
     initial = quasis[0].next_quasis[0]
     state = quasis[initial]
     symbol = list(state.transitions.keys())[0]
     next_var = order.index(symbol.symbol)+symbol.offset
-    directions[initial] = {'*' if next_var==0 else 'r'}
+    directions[initial] = {'*' if next_var==0 else 'r'}'''
 
 def print_founds():
     add_initial()
