@@ -65,19 +65,6 @@ class FunctionCall:
             next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
 
 class Instruction:
-    '''command: str
-    read: bool = None
-    big: bool = None
-    var0: str = None
-    var1: str = None
-    vard: str = None
-    varr: str = None
-    map_: dict = None
-    labels: list = None
-    next_quasis: list = None #refers to one or more indices in quasis
-    imm: int = None
-    loadto: str = None #'ACC' or 'TEMP'
-    '''
     def __init__(self,command,read=None,big=None,vard=None,map_=None,
                  labels=None,next_quasis=None,imm=None,loadto=None):
         self.command = command
@@ -110,22 +97,9 @@ class Label:
     name: str
 
 @dataclass
-class Step:
-    instruction: int #refers to an index in quasis
-    is_found: bool
-    variable: str #the variable name
-    next_quasis: list #refers to one or more indices in quasis
-    direction: bool = None
-
-@dataclass
 class End:
     is_start: bool
     next_quasis: list
-
-    def apply(self,index):
-        return End(
-            is_start=self.is_start,
-            next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
 
 @dataclass
 class State:
@@ -166,9 +140,6 @@ class Symbol:
     def __repr__(self):
         return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
 
-    def get_char(self,order):
-        return order[(order.index(self.symbol)+self.offset)%len(order)]
-
 class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
     imm2d = reg(r'[0123]') > int
@@ -179,9 +150,6 @@ class MapParser(TextParsers):
     state = ImmParser.imm2 & opt('x' >> ImmParser.imm1) > (lambda x: tuple([x[0]]+x[1]))
     mapping = state & ':' >> state
     map_ = '{' >> repsep(mapping, ',') << '}' > dict
-
-def create_args(*args):
-    return (lambda x: Instruction(x[0],**dict(zip(args,x[1:]))))
 
 def functioncall2instruction(function_call):
     command = function_call.command
@@ -218,25 +186,7 @@ class LineParser(TextParsers,whitespace=None):
     function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
     memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
     end = lit('END') > constant(End(False,[]))
-    '''instr = (
-      (memory_command &s>> valid &s>> lit('ACC','TEMP') > create_args('read','big','vard','loadto'))
-    | (lit('UNREAD','JUMP','NOTs','COMPs','SEZ') &s>> valid > create_args('vard'))
-    | ('MAP' &s>> MapParser.map_ > create_args('map_'))
-    | ('BRANCH' &s>> pred(repsep(valid,s), lambda x: len(x)==4, 'list of four labels') > create_args('labels'))
-    | ('LOADI' &s>> (ImmParser.imm2 &s>> 'ACC' | ImmParser.imm1 &s>> 'TEMP') > create_args('imm','loadto'))
-    | (lit('SLLs','SRLs','ZEROs') &s>> valid &s>> ImmParser.imm1 > create_args('vard','imm'))
-    | (lit('SLL2s','SRL2s','ADDIs','SUBIs') &s>> valid &s>> ImmParser.imm2 > create_args('vard','imm'))
-       )'''
     line = end | label | function_header | function_call
-
-def find_next_instruction(k,label):
-    for j in range(k,len(quasis)):
-        if label=='null':
-            if type(quasis[j])==Instruction or type(quasis[j])==End and not quasis[j].is_start:
-                return j
-        else:
-            if type(quasis[j])==Label and quasis[j].name==label:
-                label='null'
 
 def find_next_function(lines,k,label):
     for j in range(k,len(lines)):
@@ -351,58 +301,7 @@ def remove_ends():
                 altered = True
             except StopIteration:
                 pass                
-    return altered
-
-'''def remove_ends():
-    global quasis
-    altered = False
-    for quasi in quasis:
-        if quasi and quasi.next_quasis:
-            for k in range(len(quasi.next_quasis)):
-                quasi2 = quasis[quasi.next_quasis[k]]
-                if type(quasi2)!=Instruction and quasi2.next_quasis:
-                    quasi.next_quasis[k] = quasi2.next_quasis[0]
-                    altered = True
-    return altered'''
-
-'''def parse(text):
-    global quasis
-    lines = [line.strip() for line in text.split('\n')]
-    quasis = [End(True,[])]+[LineParser.line.parse(line).value for line in lines if line]+[End(False,[])]
-    for k,quasi in get_quasis([Instruction]):
-        if quasi.command in ['LOAD','STORE']:
-            quasi.next_quasis = [find_next_instruction(k+1,'null'),find_next_instruction(k+1,'oob')]
-        elif quasi.command=='JUMP':
-            quasi.next_quasis = [find_next_instruction(0,quasi.vard)]
-        elif quasi.command=='BRANCH':
-            quasi.next_quasis = [find_next_instruction(0,quasi.labels[j]) for j in range(4)]
-        else:
-            quasi.next_quasis = [find_next_instruction(k+1,'null')]
-    for _,quasi in get_quasis([End]):
-        quasi.next_quasis = [find_next_instruction(0,'null')]'''
-
-def group_unreads():
-    global quasis
-
-def get_search_transitions(n_step,acc):
-    global quasis
-    step = quasis[n_step]
-    instruction = quasis[step.instruction]
-    command = instruction.command
-    transitions = None
-    imm = instruction.imm
-    if command=='COMPs':
-        init_state = 1
-    elif command in ['NOTs','ZEROs','LOAD','STORE','SEZ','UNREAD']:
-        init_state = acc
-    elif command in ['SLLs','SRLs','SLL2s','SRL2s','ADDIs','SUBIs']:
-        init_state = imm
-    if command in ['SRLs','SRL2s'] or command in ['LOAD','STORE'] and instruction.big:
-        direction = 1
-    else:
-        direction = 0
-    return {Symbol(step.variable,direction):[None,init_state,step.next_quasis[0]]},None
-    
+    return altered    
 
 def get_found_transitions(n_step,acc):
     global quasis
@@ -459,19 +358,6 @@ def get_found_transitions(n_step,acc):
                 '0\'':['0',acc,n_step],'1\'':['1',acc,n_step],
                      Symbol(instruction.vard,+1):[None,acc,instruction.next_quasis[0]]},+1
 
-def steps2states():
-    global quasis
-    for k,quasi in enumerate(quasis):
-        if type(quasi)==Step:
-            for acc in range(4):
-                if quasi.is_found:
-                    transitions,direction = get_found_transitions(k,acc)
-                else:
-                    transitions,direction = get_search_transitions(k,acc)
-                if transitions:
-                    quasis.append(State(step=k,acc=acc,transitions=transitions,direction=direction))
-        
-
 def replace_links(a,b):
     global quasis
     for quasi in quasis:
@@ -483,18 +369,6 @@ def replace_links(a,b):
             for symbol in quasi.transitions:
                 if quasi.transitions[symbol][2] == a:
                     quasi.transitions[symbol][2] = b
-
-def instructions2steps():
-    global quasis
-    for k,quasi in enumerate(quasis):
-        if type(quasi)==Instruction and quasi.command in [
-                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ','UNREAD']:
-            indices = [len(quasis)+s for s in range(2)]   
-            quasis += [
-                Step(instruction=k,is_found=False,variable=quasi.vard,next_quasis=[indices[1]]),
-                Step(instruction=k,is_found=True,variable=quasi.vard,next_quasis=quasi.next_quasis)
-            ]
-            replace_links(k,indices[0])
 
 def instructions2states():
     global quasis
@@ -510,44 +384,6 @@ def validate_maps(map_):
     sizes = {(len(key),len(map_[key])) for key in map_}    
     assert len(sizes)==1
     return sizes.pop()
-
-'''def apply_posts():
-    global quasis
-    altered = False
-    for quasi in quasis:
-        if type(quasi)==State:
-            instruction = quasis[quasis[quasi.step].instruction]
-            for symbol in quasi.transitions:
-                transition = quasi.transitions[symbol]
-                quasi2 = quasis[transition[2]]
-                if type(quasi2)==Instruction:
-                    if quasi2.command=='JUMP':
-                        transition[2] = quasi2.next_quasis[0]
-                        altered = True
-                    elif quasi2.command=='BRANCH':
-                        transition[2] = quasi2.next_quasis[transition[1]]
-                        altered = True
-                    elif quasi2.command=='LOADI' and quasi2.loadto=='ACC':
-                        transition[1] = quasi2.imm
-                        transition[2] = quasi2.next_quasis[0]
-                        altered = True
-                    elif quasi2.command=='MAP':
-                        size = validate_maps(quasi2.map_)
-                        if size==(2,1):
-                            assert instruction.command=='LOAD' and instruction.loadto=='TEMP'
-                            if (transition[1],int(symbol)) in quasi2.map_:
-                                transition[1] = quasi2.map_[(transition[1],int(symbol))][0]
-                            transition[2] = quasi2.next_quasis[0]
-                            altered = True
-                        elif size==(1,1):
-                            if (transition[1],) in quasi2.map_:
-                                transition[1] = quasi2.map_[(transition[1],)][0]
-                            transition[2] = quasi2.next_quasis[0]                            
-                            altered = True
-                elif type(quasi2) in [FunctionCall,End] and quasi2.next_quasis:
-                    transition[2] = quasi2.next_quasis[0]
-                    altered = True
-    return altered'''
 
 def apply_posts():
     global quasis
@@ -579,32 +415,6 @@ def apply_posts():
                 altered = True
     return altered
 
-'''def apply_pres():
-    global quasis
-    altered = False
-    for k,quasi in enumerate(quasis):
-        if type(quasi)==Instruction:
-            if quasi.command=='MAP' or quasi.command=='LOADI' and quasi.loadto=='TEMP':
-                if quasi.command=='MAP':
-                    size = validate_maps(quasi.map_)
-                if quasi.command=='LOADI' or size==(1,2):
-                    for quasi2 in quasis:
-                        if (type(quasi2)==State and quasis[quasi2.step].is_found and
-                                quasis[quasi.next_quasis[0]].next_quasis[0]==quasi2.step):
-                            for symbol in ['0','1']:
-                                transition = quasi2.transitions[symbol]
-                                if quasi.command=='MAP':
-                                    if (quasi2.acc,) in quasi.map_:
-                                        mapping = quasi.map_[(quasi2.acc,)]
-                                        transition[0] = str(mapping[1]) + transition[0][1:]
-                                        transition[1] = mapping[0]
-                                else:
-                                    transition[0] = str(quasi.imm) + transition[0][1:]
-                            altered = True
-                    replace_links(k,quasi.next_quasis[0])
-                    quasi.next_quasis[0] = 0
-    return altered'''
-
 def get_states_of(instruction):
     for k,state in get_quasis([State]):
         if state.instruction == instruction:
@@ -629,33 +439,6 @@ def apply_pres():
             replace_links(k,instr.next_quasis[0])
             instr.next_quasis[0] = 0
     return altered
-
-'''def skip_searches():
-    global quasis
-    altered = False
-    for quasi in quasis:
-        if type(quasi)==State:
-            step = quasis[quasi.step]
-            instruction = quasis[step.instruction]
-            command = instruction.command
-            if step.is_found and command in ['LOAD','STORE']:
-                for symbol in quasi.transitions:
-                    quasi2 = quasis[quasi.transitions[symbol][2]]
-                    if type(quasi2)==State:
-                        step2 = quasis[quasi2.step]
-                        if not step2.is_found and step.variable==step2.variable:
-                            instruction2 = quasis[step2.instruction]
-                            command2 = instruction2.command
-                            if command2 in ['LOAD','STORE'] and instruction.big==instruction2.big:
-                                if instruction.read:
-                                    quasi.transitions[symbol][2] = list(quasi2.transitions.values())[0][2]
-                                else:
-                                    quasi3 = quasis[list(quasi2.transitions.values())[0][2]]
-                                    symbol3 = quasi.transitions[symbol][0]
-                                    symbol3 = symbol if symbol3==None else symbol3
-                                    quasi.transitions[symbol] = quasi3.transitions[symbol3]
-                                altered = True
-    return altered'''
 
 def adjacent_bits(instruction,next_instruction):
     return (instruction.command in ['LOAD','STORE'] and
@@ -689,37 +472,12 @@ def find_state(acc,step):
     else:
         return step
 
-'''def stitch_acc():
-    global quasis
-    for quasi in quasis:
-        if type(quasi)==End and quasi.is_start:
-            quasi.next_quasis[0] = find_state(0,quasi.next_quasis[0])
-        if type(quasi)==State:
-            for symbol in quasi.transitions:
-                transition = quasi.transitions[symbol]
-                transition[2] = find_state(transition[1],transition[2])'''
-
 def stitch_acc():
     global quasis
     quasis[0].next_quasis[0] = find_state(0,quasis[0].next_quasis[0])
     for _,state in get_quasis([State]):
         for _,transition,_ in get_quasis_from(state,[Instruction]):
             transition[2] = find_state(transition[1],transition[2])
-            
-
-'''def find_successors(k):
-    global quasis,used_states
-    if type(quasis[k])==End and quasis[k].next_quasis:
-        for j in quasis[k].next_quasis:
-            if not j in used_states:
-                used_states.add(j)
-                find_successors(j)
-    if type(quasis[k])==State:
-        for symbol in quasis[k].transitions:
-            j = quasis[k].transitions[symbol][2]
-            if not j in used_states:
-                used_states.add(j)
-                find_successors(j)'''
 
 def find_successors(k):
     global quasis,used_states
@@ -730,18 +488,6 @@ def find_successors(k):
         if not j in used_states:
                 used_states.add(j)
                 find_successors(j)
-
-'''def merge_links():
-    for k,state1 in enumerate(quasis):
-        if type(state1)==State:
-            for j,state2 in enumerate(quasis):
-                if j>k:
-                    if type(state2)==State:
-                        if equal_states(k,j):
-                            quasis[j]=None
-                            replace_links(j,k)
-                            return True
-    return False'''
 
 def merge_links():
     altered = False
@@ -790,7 +536,7 @@ def to_char(symbol):
     if symbol==None:
         return '*'
     elif type(symbol)==Symbol:
-        return symbol.get_char()[-1]
+        return symbol2string(symbol,[])[-1]
     elif symbol=='0\'':
         return '2'
     elif symbol=='1\'':
@@ -860,75 +606,6 @@ def searches2rules(order):
             if d:
                 rules[(str(k)+d,None)] = (str(k)+d,None,d)
                 rules[(str(k)+d,order[var])] = (str(k),None,quasis[k].direction)
-                    
-
-'''def add_initial():
-    initial = quasis[0].next_quasis[0]
-    state = quasis[initial]
-    symbol = list(state.transitions.keys())[0]
-    next_var = order.index(symbol.symbol)+symbol.offset
-    directions[initial] = {'*' if next_var==0 else 'r'}'''
-
-def print_founds():
-    add_initial()
-    for k,quasi in enumerate(quasis):
-        if k in used_states and type(quasi)==State:
-            step = quasis[quasi.step]
-            if step.is_found:
-                for symbol in quasi.transitions:
-                    transition = quasi.transitions[symbol]
-                    quasi2 = quasis[transition[2]]
-                    if type(quasi2)==State:
-                        step2 = quasis[quasi2.step]
-                        if step2.is_found:
-                            if quasi.direction>0:
-                                direction = 'r'
-                            else:
-                                direction = 'l'
-                        else:
-                            symbol2 = list(quasi2.transitions.keys())[0]
-                            next_var = order.index(symbol2.symbol)+symbol2.offset
-                            if type(symbol)==Symbol:
-                                current_var = order.index(symbol.symbol)+symbol.offset
-                                if next_var<current_var:
-                                    direction = 'l'
-                                elif next_var>current_var:
-                                    direction = 'r'
-                                else:
-                                    direction = '*'
-                            else:
-                                current_var = order.index(step.variable)
-                                if next_var>current_var:
-                                    direction = 'r'
-                                else:
-                                    direction = 'l'
-                    else:
-                        step2 = None
-                        direction = '*'
-                    print(k,
-                        to_char(symbol),
-                        to_char(transition[0]),
-                        direction,
-                        str(transition[2])+('' if step2.is_found else direction) if type(quasis[transition[2]])==State else 'halt')
-                    if step2 and not step2.is_found:
-                        if transition[2] in directions:
-                            directions[transition[2]].add(direction)
-                        else:
-                            directions[transition[2]] = {direction}
-
-def print_searches():
-    for search in directions:
-        for direction in directions[search]:
-            state = quasis[search]
-            for symbol in state.transitions:
-                transition = state.transitions[symbol]
-                next_direction = quasis[transition[2]].direction
-                print(str(search)+direction,
-                    to_char(list(state.transitions.keys())[0]),
-                    '*',
-                    'l' if next_direction<0 else 'r',
-                    transition[2])
-            print(str(search)+direction,'*','*',direction,'*')
 
 parse_files()
 link_lines()
