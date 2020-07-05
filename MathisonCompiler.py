@@ -502,7 +502,7 @@ def merge_links():
 					
 
 def compile_function(function_call,order=None):
-    global quasis, used_states, directions, rules
+    global quasis, used_states, rules, best_order
     quasis = []
     function = LineParser.line.parse(function_call).value
     function.next_quasis = [None]
@@ -526,16 +526,17 @@ def compile_function(function_call,order=None):
     find_successors(0)
     directions = {}
     states2searches()
+    if not order:
+        order = list({instruction.vard for _,instruction in
+                      get_quasis([Instruction]) if instruction.vard})
     best_order = order
     best_score = score(order)
     for _ in range(len(order)*2):
         shuffle(order)
         new_order,new_score = find_optimal_order(order)
         if new_score<best_score:
-            best_score = new_score
-            best_order = new_order
+            best_order,best_score = new_order,new_score
     states2rules(best_order)
-    print(best_order)
     searches2rules(best_order)
 
 def sign2char(sign):
@@ -574,11 +575,6 @@ def score(to_symbols,from_symbols,order):
                 right = True
         total += (left+right)
     return total
-
-def add_initial(order):
-    _,k,state = next(get_quasis_from(quasis[0],[State]))
-    next_var = order.index(quasis[state.instruction].vard)+(state.direction<0)
-    directions[k] = {(next_var,sign2char(next_var))}
 
 def states2searches():
     global to_symbols, from_symbols, transition_symbols
@@ -671,8 +667,29 @@ def states2rules(order):
 def searches2rules(order):
     for k in {value[0] for value in rules.values() if value[0][-1] in ['L','R']}:
         rules[(k,None)] = (k,None,k[-1])
-        rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,quasis[int(k[:-1])].direction)
+        rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,sign2char(quasis[int(k[:-1])].direction))
+
+def morphett_output():
+    replacements = {'0':'0','1':'1','0\'':'2','1\'':'3'}
+    k = 97
+    for var in best_order:
+        if len(var)>1:
+            while chr(k) in best_order:
+                k+=1
+            replacements[var]=chr(k)
+        else:
+            replacements[var]=var
+    result = ''
+    for key,value in rules.items():
+        result += ' '.join([
+            key[0],
+            replacements[key[1]] if key[1] else '*',
+            replacements[value[1]] if value[1] else '*',
+            value[2].lower(),
+            value[0]
+	]) + '\n'
+    return result
+    
 
 parse_files()
 link_lines()
-order = ['varr', 'V', 'N', 'P', 'S']
