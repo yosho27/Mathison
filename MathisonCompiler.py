@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from parsita import *
 from parsita.util import constant,splat
 import os
+from random import shuffle
 
 more_transitions = {
     'COMPs':{
@@ -361,7 +362,7 @@ def get_found_transitions(n_step,acc):
 def replace_links(a,b):
     global quasis
     for quasi in quasis:
-        if type(quasi) in [Instruction,Step,End] and quasi.next_quasis:
+        if type(quasi) in [Instruction,End] and quasi.next_quasis:
             for k in range(len(quasi.next_quasis)):
                 if quasi.next_quasis[k] == a:
                     quasi.next_quasis[k] = b
@@ -524,25 +525,18 @@ def compile_function(function_call,order=None):
     used_states = {0}
     find_successors(0)
     directions = {}
-    add_initial(order)
-    states2rules(order)
-    searches2rules(order)
-    #print_founds()
-    #print_searches()
-    #for k in sorted(used_states):
-    #    print(k,quasis[k])
-
-def to_char(symbol):
-    if symbol==None:
-        return '*'
-    elif type(symbol)==Symbol:
-        return symbol2string(symbol,[])[-1]
-    elif symbol=='0\'':
-        return '2'
-    elif symbol=='1\'':
-        return '3'
-    else:
-        return symbol[-1]
+    states2searches()
+    best_order = order
+    best_score = score(order)
+    for _ in range(len(order)*2):
+        shuffle(order)
+        new_order,new_score = find_optimal_order(order)
+        if new_score<best_score:
+            best_score = new_score
+            best_order = new_order
+    states2rules(best_order)
+    print(best_order)
+    searches2rules(best_order)
 
 def sign2char(sign):
     if sign<0:
@@ -560,10 +554,92 @@ def symbol2string(symbol,order):
     else:
         return str(symbol)
 
+def symbol2int(symbol,order):
+    if type(symbol)==Symbol:
+        return order.index(symbol.symbol)+symbol.offset
+    else:
+        return int(symbol)
+
+def score(to_symbols,from_symbols,order):
+    total = 0
+    for k in to_symbols:
+        to_symbol = to_symbols[k]
+        left = False
+        right = False
+        for from_symbol in from_symbols[k]:
+            offset = symbol2int(to_symbol,order) - symbol2int(from_symbol,order)
+            if offset<0:
+                left = True
+            if offset>0:
+                right = True
+        total += (left+right)
+    return total
+
 def add_initial(order):
     _,k,state = next(get_quasis_from(quasis[0],[State]))
     next_var = order.index(quasis[state.instruction].vard)+(state.direction<0)
     directions[k] = {(next_var,sign2char(next_var))}
+
+def states2searches():
+    global to_symbols, from_symbols, transition_symbols
+    to_symbols = {}
+    transition_symbols = {quasis[0].next_quasis[0]:{0:0}}
+    for k,state in get_quasis([State]):
+        if k in used_states:
+            instruction = quasis[state.instruction]
+            to_symbols[k] = Symbol(instruction.vard,int(state.direction<0)) 
+            for symbol,transition,next_state in get_quasis_from(state,[State]):
+                next_instruction = quasis[next_state.instruction]
+                if not (adjacent_bits(instruction,next_instruction)):
+                    if type(symbol)==Symbol:
+                        current_loc = symbol
+                    else:
+                        current_loc = Symbol(instruction.vard,( 
+                            instruction.command in ['LOAD','STORE'] and symbol in ['0','1'] or
+                            instruction.command=='SEZ' and symbol=='1')/2)
+                    if not transition[2] in transition_symbols:
+                        transition_symbols[transition[2]] = {}
+                    transition_symbols[transition[2]][k] = current_loc
+    from_symbols = {key:set(value.values()) for key,value in transition_symbols.items()}
+
+def find_optimal_order(order):
+    best_order = order
+    original_score = score(order)
+    best_score = original_score
+    for a in range(len(order)):
+        for b in range(len(order)+1):
+            new_order = move_element(order,a,b)
+            if new_order:
+                new_score = score(new_order)
+                if new_score<best_score:
+                    best_score = new_score
+                    best_order = new_order		    
+    if best_score<original_score:
+        return find_optimal_order(best_order)
+    else:
+        return best_order,best_score
+    
+def move_element(A,a,b):
+    if b>a+1:
+        return A[:a]+A[a+1:b]+A[a:a+1]+A[b:]
+    elif b<a:
+        return A[:b]+A[a:a+1]+A[b:a]+A[a+1:]
+
+def score(order):
+    global to_symbols, from_symbols
+    total = 0
+    for k in to_symbols:
+        to_symbol = to_symbols[k]
+        left = False
+        right = False
+        for from_symbol in from_symbols[k]:
+            offset = symbol2int(to_symbol,order) - symbol2int(from_symbol,order)
+            if offset<0:
+                left = True
+            if offset>0:
+                right = True
+        total += (left+right)
+    return total         
 
 def states2rules(order):
     global rules
@@ -573,27 +649,19 @@ def states2rules(order):
             instruction = quasis[state.instruction]
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if (adjacent_bits(instruction,next_instruction) and instruction.read):                    
+                if adjacent_bits(instruction,next_instruction):                    
                     rules[(str(k),symbol2string(symbol,order))] = (
                         str(k),
                         symbol2string(transition[0],order),
                         sign2char(state.direction))
                 else:
-                    if type(symbol)==Symbol:
-                        current_var = order.index(symbol.symbol)+symbol.offset
-                    else:
-                        current_var = order.index(instruction.vard)+(
-                            instruction.command in ['LOAD','STORE'] and symbol in ['0','1'] or
-                            instruction.command=='SEZ' and symbol=='1')/2
-                    next_var = order.index(next_instruction.vard)+(next_state.direction<0)
+                    current_var = symbol2int(transition_symbols[transition[2]][k],order)
+                    next_var = symbol2int(to_symbols[transition[2]],order)
                     direction = sign2char(next_var-current_var)
                     rules[(str(k),symbol2string(symbol,order))] = (
-                             str(k)+direction,
+                             str(transition[2])+direction,
                              symbol2string(transition[0],order),
                              direction if direction else sign2char(next_state.direction))
-                    if not transition[2] in directions:
-                        directions[transition[2]] = set()
-                    directions[transition[2]].add((next_var,direction))
             for symbol,transition,end in get_quasis_from(state,[End]):
                 rules[(str(k),symbol2string(symbol,order))] = (
                     'halt',
@@ -601,11 +669,9 @@ def states2rules(order):
                     '')
 
 def searches2rules(order):
-    for k,search in directions.items():
-        for var,d in search:
-            if d:
-                rules[(str(k)+d,None)] = (str(k)+d,None,d)
-                rules[(str(k)+d,order[var])] = (str(k),None,quasis[k].direction)
+    for k in {value[0] for value in rules.values() if value[0][-1] in ['L','R']}:
+        rules[(k,None)] = (k,None,k[-1])
+        rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,quasis[int(k[:-1])].direction)
 
 parse_files()
 link_lines()

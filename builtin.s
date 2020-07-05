@@ -187,6 +187,22 @@ UNREAD vard
 END
 
 
+FUNC MOD varr var0 var1
+ZEROs varr 0
+start:
+SLLs varr 0
+LOADNEXTBIG var0 ACC
+STORE varr ACC
+SLT varr var1
+BRANCH sub start null null
+sub:
+SUBs varr var1
+JUMP start
+oob:
+UNREAD var0
+END
+
+
 FUNC RECP vard varr var0
 ZEROs varr 0
 start:

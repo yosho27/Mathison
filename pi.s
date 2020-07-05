@@ -10,6 +10,7 @@ ADDIs N 2
 BRANCH null end null null
 NOTs S
 JUMP start
+oob:
 end:
 END
 
@@ -37,5 +38,25 @@ RECP Q varr F
 ADDs E Q
 ADDIs N 1
 BRANCH next end null null
+end:
+END
+
+FUNC PRIME
+start:
+ZEROs D 0
+ADDIs D 2
+next:
+MOD R N D
+SEZ R
+BRANCH null notprime null null
+ADDIs D 1
+SLT D N
+BRANCH null next null null
+SUBIs C 1
+SEZ C
+BRANCH null end null null
+notprime:
+ADDIs N 1
+JUMP start
 end:
 END
