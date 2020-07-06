@@ -473,12 +473,24 @@ def find_state(acc,step):
     else:
         return step
 
+def get_init_acc(acc,step):
+    instruction = quasis[step]
+    command,imm = instruction.command,instruction.imm
+    if command=='COMPs':
+        return 1
+    elif command in ['NOTs','ZEROs','LOAD','STORE','SEZ','UNREAD']:
+        return acc
+    elif command in ['SLLs','SRLs','SLL2s','SRL2s','ADDIs','SUBIs']:
+        return imm
+
 def stitch_acc():
     global quasis
+    get_init_acc(0,quasis[0].next_quasis[0])
     quasis[0].next_quasis[0] = find_state(0,quasis[0].next_quasis[0])
     for _,state in get_quasis([State]):
         for _,transition,_ in get_quasis_from(state,[Instruction]):
-            transition[2] = find_state(transition[1],transition[2])
+            init_acc = get_init_acc(transition[1],transition[2])
+            transition[2] = find_state(init_acc,transition[2])
 
 def find_successors(k):
     global quasis,used_states
