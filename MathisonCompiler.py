@@ -46,6 +46,8 @@ more_transitions = {
 functions = []
 quasis = []
 
+#### CLASSES ####
+
 @dataclass
 class FunctionHeader:
     command: str
@@ -109,6 +111,16 @@ class State:
     transitions: dict #{symbol:[symbol,acc,step)}
     direction: int #+1 or -1
 
+@dataclass(frozen=True,eq=True)
+class Symbol:
+    symbol: str
+    offset: int = 0
+
+    def __repr__(self):
+        return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
+
+#### STATE-EQUALITY FUNCTIONS ####
+
 def get_none_transition(state,symbol,k):
     if symbol in state.transitions:
         transition = state.transitions[symbol]
@@ -117,7 +129,7 @@ def get_none_transition(state,symbol,k):
         else:
             return transition
     else:
-        return [symbol,0,k]
+        return [symbol,0,k,False]
     
 
 def equal_states(k,j):
@@ -127,19 +139,12 @@ def equal_states(k,j):
     for symbol in state1.transitions.keys()|state2.transitions.keys():
         transition1 = get_none_transition(state1,symbol,k)
         transition2 = get_none_transition(state2,symbol,j)
-        if not (transition1[0]==transition2[0] and
+        if not (transition1[0]==transition2[0] and transition1[3]==transition2[3] and
                 (transition1[2]==transition2[2] or transition1[2]==k and transition2[2]==j)):
             return False
     return True
-    
-        
-@dataclass(frozen=True,eq=True)
-class Symbol:
-    symbol: str
-    offset: int = 0
 
-    def __repr__(self):
-        return 'Sym(\''+self.symbol+'\'+'+str(self.offset)+')'
+#### PARSERS ####
 
 class ImmParser(TextParsers,whitespace=None):
     imm1 = reg(r'[01]') > int
@@ -151,6 +156,19 @@ class MapParser(TextParsers):
     state = ImmParser.imm2 & opt('x' >> ImmParser.imm1) > (lambda x: tuple([x[0]]+x[1]))
     mapping = state & ':' >> state
     map_ = '{' >> repsep(mapping, ',') << '}' > dict
+
+class LineParser(TextParsers,whitespace=None):
+    s = reg(r'[ \t]+')
+    valid = reg(r'[A-Za-z][A-Za-z0-9_]*')
+    label = valid << ':' > Label
+    arg = reg(r'[vimVIM][A-Za-z0-9_]*')
+    function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
+    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
+    memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
+    end = lit('END') > constant(End(False,[]))
+    line = end | label | function_header | function_call
+
+#### PRE-COMPILATION FUNCTIONS ####
 
 def functioncall2instruction(function_call):
     command = function_call.command
@@ -176,18 +194,6 @@ def functioncall2instruction(function_call):
         return instr
     else:
         return function_call
-    
-
-class LineParser(TextParsers,whitespace=None):
-    s = reg(r'[ \t]+')
-    valid = reg(r'[A-Za-z][A-Za-z0-9_]*')
-    label = valid << ':' > Label
-    arg = reg(r'[vimVIM][A-Za-z0-9_]*')
-    function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
-    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
-    memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
-    end = lit('END') > constant(End(False,[]))
-    line = end | label | function_header | function_call
 
 def find_next_function(lines,k,label):
     for j in range(k,len(lines)):
@@ -247,28 +253,7 @@ def link_lines():
             elif type(quasi)==End and quasi.is_start:
                 quasi.next_quasis = [find_next_function(lines,0,'null')]
 
-def evaluate_function_call(function_call):
-    global functions, quasis
-    for function in functions:
-        if function.command==function_call.command:
-            assert len(function.params)==len(function_call.args)
-            index = len(quasis)
-            argsdict = dict(zip(function.params,function_call.args))
-            quasis += [None]*len(function.lines)
-            replacements = []
-            for k,line in enumerate(function.lines):
-                if type(line)==FunctionCall:
-                    new_function = functioncall2instruction(line.apply(index,argsdict))
-                    quasis[index+k] = new_function
-                    if type(new_function)==FunctionCall:
-                        new_index = len(quasis)
-                        evaluate_function_call(new_function)
-                        new_function.next_quasis = [new_index]
-                elif type(line)==End:
-                    if line.is_start:
-                        quasis[index+k] = End(True,[index+line.next_quasis[0]])                        
-                    else:
-                        quasis[index+k] = End(False,function_call.next_quasis)
+#### GENERATORS ####
 
 def get_quasis(types=[FunctionCall,Instruction,State,End]):
     global quasis
@@ -292,6 +277,36 @@ def get_quasis_from(quasi,types=[FunctionCall,Instruction,State,End]):
                 elif State in types:
                     yield from get_states_of(next_quasi)
 
+def get_states_of(n_step):
+    for k,state in get_quasis([State]):
+        if state.instruction == n_step:
+            yield k,state
+
+#### COMPILATION FUNCTIONS ####
+            
+def evaluate_function_call(function_call):
+    global functions, quasis
+    for function in functions:
+        if function.command==function_call.command:
+            assert len(function.params)==len(function_call.args)
+            index = len(quasis)
+            argsdict = dict(zip(function.params,function_call.args))
+            quasis += [None]*len(function.lines)
+            replacements = []
+            for k,line in enumerate(function.lines):
+                if type(line)==FunctionCall:
+                    new_function = functioncall2instruction(line.apply(index,argsdict))
+                    quasis[index+k] = new_function
+                    if type(new_function)==FunctionCall:
+                        new_index = len(quasis)
+                        evaluate_function_call(new_function)
+                        new_function.next_quasis = [new_index]
+                elif type(line)==End:
+                    if line.is_start:
+                        quasis[index+k] = End(True,[index+line.next_quasis[0]])                        
+                    else:
+                        quasis[index+k] = End(False,function_call.next_quasis)
+
 def remove_ends():
     global quasis
     altered = False
@@ -306,7 +321,6 @@ def remove_ends():
 
 def get_found_transitions(n_step,acc):
     global quasis
-    #step = quasis[n_step]
     instruction = quasis[n_step]
     command = instruction.command
     transitions = None
@@ -324,20 +338,20 @@ def get_found_transitions(n_step,acc):
         else:
             return {},None
     #"Other primitive commands" except SEZ
-    if command in ['SRLs','SRL2s']:
+    if command in ['SRLs','SRL2s','ZEROs']:
         direction = 0
     else:
         direction = +1
     if transitions:
         for symbol in transitions:
-            transitions[symbol] += [n_step]
+            transitions[symbol] += [n_step,False]
         transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
-        transitions[Symbol(instruction.vard,direction)] = [None,acc,instruction.next_quasis[0]]
+        transitions[Symbol(instruction.vard,direction)] = [None,acc,instruction.next_quasis[0],True]
         return transitions,2*direction-1
     #SEZ
     if command=='SEZ':
-        return {'0':['0',acc,n_step],'1':['1',0,instruction.next_quasis[0]],
-                     Symbol(instruction.vard,+1):[None,1,instruction.next_quasis[0]]},+1
+        return {'0':['0',1,n_step,False],'1':['1',0,instruction.next_quasis[0],True],
+                     Symbol(instruction.vard,+1):[None,1,instruction.next_quasis[0],True]},+1
     #All LOAD and STORE commands
     use_temp = instruction.loadto=='TEMP'
     if command=='LOAD':
@@ -348,28 +362,27 @@ def get_found_transitions(n_step,acc):
         for symbol in transitions:
             if instruction.read:
                 transitions[symbol][0] += '\''
-            transitions[symbol] += [instruction.next_quasis[0]]
+            transitions[symbol] += [instruction.next_quasis[0],True]
         transitions.update(
-            {'0\'':['0\'',acc,n_step],'1\'':['1\'',acc,n_step],
-            Symbol(instruction.vard,1-instruction.big):[None,acc,instruction.next_quasis[1]]})
+            {'0\'':['0\'',acc,n_step,False],'1\'':['1\'',acc,n_step,False],
+            Symbol(instruction.vard,1-instruction.big):[None,acc,instruction.next_quasis[1],True]})
         return transitions,1-2*instruction.big
     #UNREAD
     if command=='UNREAD':
-        return {'0':['0',acc,n_step],'1':['1',acc,n_step],
-                '0\'':['0',acc,n_step],'1\'':['1',acc,n_step],
-                     Symbol(instruction.vard,+1):[None,acc,instruction.next_quasis[0]]},+1
+        return {'0':['0',acc,n_step,False],'1':['1',acc,n_step,False],
+                '0\'':['0',acc,n_step,False],'1\'':['1',acc,n_step,False],
+                     Symbol(instruction.vard,0):[None,acc,instruction.next_quasis[0],True]},-1
 
 def replace_links(a,b):
     global quasis
-    for quasi in quasis:
-        if type(quasi) in [Instruction,End] and quasi.next_quasis:
-            for k in range(len(quasi.next_quasis)):
-                if quasi.next_quasis[k] == a:
-                    quasi.next_quasis[k] = b
-        elif type(quasi)==State:
-            for symbol in quasi.transitions:
-                if quasi.transitions[symbol][2] == a:
-                    quasi.transitions[symbol][2] = b
+    for _,quasi in get_quasis([Instruction,End]):
+        for k in range(len(quasi.next_quasis)):
+            if quasi.next_quasis[k] == a:
+                quasi.next_quasis[k] = b
+    for _,quasi in get_quasis([State]):
+        for symbol in quasi.transitions:
+            if quasi.transitions[symbol][2] == a:
+                quasi.transitions[symbol][2] = b
 
 def instructions2states():
     global quasis
@@ -416,11 +429,6 @@ def apply_posts():
                 altered = True
     return altered
 
-def get_states_of(instruction):
-    for k,state in get_quasis([State]):
-        if state.instruction == instruction:
-            yield k,state
-
 def apply_pres():
     global quasis
     altered = False
@@ -456,7 +464,7 @@ def skip_searches():
         if command in ['LOAD','STORE'] and not instruction.read:
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if (k!=transition[2] and adjacent_bits(instruction,next_instruction)):
+                if k!=transition[2] and adjacent_bits(instruction,next_instruction):
                     next_symbol = transition[0] if transition[0] else symbol
                     state.transitions[symbol] = next_state.transitions[next_symbol]
                     altered = True
@@ -464,38 +472,38 @@ def skip_searches():
                     
 
 
-def find_state(acc,step):
+def find_state(acc,n_step):
     global quasis
-    if type(quasis[step])==Instruction:
-        for k,state in get_states_of(step):
+    if type(quasis[n_step])==Instruction:
+        for k,state in get_states_of(n_step):
             if state.acc==acc:
                 return k
     else:
         return step
 
-def get_init_acc(acc,step):
-    instruction = quasis[step]
+def get_init_acc(acc,n_step):
+    instruction = quasis[n_step]
     command,imm = instruction.command,instruction.imm
-    if command=='COMPs':
+    if command in ['COMPs','SEZ']:
         return 1
-    elif command in ['NOTs','ZEROs','LOAD','STORE','SEZ','UNREAD']:
+    elif command in ['NOTs','ZEROs','LOAD','STORE','UNREAD']:
         return acc
     elif command in ['SLLs','SRLs','SLL2s','SRL2s','ADDIs','SUBIs']:
         return imm
 
 def stitch_acc():
     global quasis
-    get_init_acc(0,quasis[0].next_quasis[0])
-    quasis[0].next_quasis[0] = find_state(0,quasis[0].next_quasis[0])
+    first_quasis = quasis[0].next_quasis
+    first_quasis[0] = find_state(get_init_acc(0,first_quasis[0]),first_quasis[0])
     for _,state in get_quasis([State]):
         for _,transition,_ in get_quasis_from(state,[Instruction]):
-            init_acc = get_init_acc(transition[1],transition[2])
-            transition[2] = find_state(init_acc,transition[2])
+            transition[2] = find_state(
+                get_init_acc(transition[1],transition[2]) if transition[3] else transition[1],
+                transition[2])
 
 def find_successors(k):
     global quasis,used_states
-    for something in get_quasis_from(quasis[k],[End,State]):
-        j = something[1]
+    for _,j,_ in get_quasis_from(quasis[k],[End,State]):
         if type(j)==list:
             j = j[2]
         if not j in used_states:
@@ -541,8 +549,7 @@ def compile_function(function_call,order=None):
     if not order:
         order = list({instruction.vard for _,instruction in
                       get_quasis([Instruction]) if instruction.vard})
-    best_order = order
-    best_score = score(order)
+    best_order,best_score = order,score(order)
     for _ in range(len(order)*2):
         shuffle(order)
         new_order,new_score = find_optimal_order(order)
@@ -598,16 +605,11 @@ def states2searches():
             to_symbols[k] = Symbol(instruction.vard,int(state.direction<0)) 
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if not (adjacent_bits(instruction,next_instruction)):
-                    if type(symbol)==Symbol:
-                        current_loc = symbol
-                    else:
-                        current_loc = Symbol(instruction.vard,( 
-                            instruction.command in ['LOAD','STORE'] and symbol in ['0','1'] or
-                            instruction.command=='SEZ' and symbol=='1')/2)
+                if transition[3] and not adjacent_bits(instruction,next_instruction):
                     if not transition[2] in transition_symbols:
                         transition_symbols[transition[2]] = {}
-                    transition_symbols[transition[2]][k] = current_loc
+                    transition_symbols[transition[2]][k] = (
+                        symbol if type(symbol)==Symbol else Symbol(instruction.vard,1/2) )
     from_symbols = {key:set(value.values()) for key,value in transition_symbols.items()}
 
 def find_optimal_order(order):
@@ -636,7 +638,7 @@ def move_element(A,a,b):
 def score(order):
     global to_symbols, from_symbols
     total = 0
-    for k in to_symbols:
+    for k in from_symbols:
         to_symbol = to_symbols[k]
         left = False
         right = False
@@ -657,12 +659,7 @@ def states2rules(order):
             instruction = quasis[state.instruction]
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if adjacent_bits(instruction,next_instruction):                    
-                    rules[(str(k),symbol2string(symbol,order))] = (
-                        str(k),
-                        symbol2string(transition[0],order),
-                        sign2char(state.direction))
-                else:
+                if transition[2] in transition_symbols and k in transition_symbols[transition[2]]:
                     current_var = symbol2int(transition_symbols[transition[2]][k],order)
                     next_var = symbol2int(to_symbols[transition[2]],order)
                     direction = sign2char(next_var-current_var)
@@ -670,6 +667,11 @@ def states2rules(order):
                              str(transition[2])+direction,
                              symbol2string(transition[0],order),
                              direction if direction else sign2char(next_state.direction))
+                else:
+                    rules[(str(k),symbol2string(symbol,order))] = (
+                            str(transition[2]),
+                            symbol2string(transition[0],order),
+                            sign2char(state.direction))
             for symbol,transition,end in get_quasis_from(state,[End]):
                 rules[(str(k),symbol2string(symbol,order))] = (
                     'halt',
@@ -697,7 +699,7 @@ def morphett_output():
             key[0],
             replacements[key[1]] if key[1] else '*',
             replacements[value[1]] if value[1] else '*',
-            value[2].lower(),
+            value[2].lower() if value[2] else '*',
             value[0]
 	]) + '\n'
     return result
