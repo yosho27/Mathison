@@ -69,10 +69,10 @@ FUNC SUBs vard var0
 LOADI 0 ACC
 start:
 LOADNEXT var0 TEMP
-MAP {0x0:0, 0x1:1, 3x0:3, 3x1:0}
+MAP {0x0:0, 0x1:3, 3x0:3, 3x1:2}
 LOAD vard TEMP
-MAP {0x0:0, 0x1:3, 1x0:1, 1x1:0, 3x0:3, 3x1:2}
-MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
+MAP {0x0:0, 0x1:1, 2x0:2, 2x1:3, 3x0:3, 3x1:0}
+MAP {0:0x0, 1:0x1, 2:3x0, 3:3x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 

@@ -386,6 +386,8 @@ def replace_links(a,b):
 
 def instructions2states():
     global quasis
+    quasis[0] = State(instruction=0,acc=0,
+                      transitions={0:[None,0,quasis[0].next_quasis[0],True]},direction=None)
     for k,instr in get_quasis([Instruction]):
         if instr.command in [
                 'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ','UNREAD']:
@@ -446,11 +448,13 @@ def apply_pres():
                         transition[0] = str(instr.imm) + transition[0][1:]
                 altered = True
             replace_links(k,instr.next_quasis[0])
-            instr.next_quasis[0] = 0
+            quasis[k] = None
     return altered
 
 def adjacent_bits(instruction,next_instruction):
-    return (instruction.command in ['LOAD','STORE'] and
+    return (type(instruction)==Instruction and
+            type(next_instruction)==Instruction and
+            instruction.command in ['LOAD','STORE'] and
             next_instruction.command in ['LOAD','STORE'] and
             instruction.vard==next_instruction.vard and
             instruction.big==next_instruction.big)
@@ -460,7 +464,7 @@ def skip_searches():
     altered = False
     for k,state in get_quasis([State]):
         instruction = quasis[state.instruction]
-        command = instruction.command
+        command = instruction.command if state.instruction else None
         if command in ['LOAD','STORE'] and not instruction.read:
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
@@ -493,8 +497,6 @@ def get_init_acc(acc,n_step):
 
 def stitch_acc():
     global quasis
-    first_quasis = quasis[0].next_quasis
-    first_quasis[0] = find_state(get_init_acc(0,first_quasis[0]),first_quasis[0])
     for _,state in get_quasis([State]):
         for _,transition,_ in get_quasis_from(state,[Instruction]):
             transition[2] = find_state(
@@ -520,6 +522,7 @@ def merge_links():
                 altered = True
     return altered
 					
+#### MAIN FUNCTION ####
 
 def compile_function(function_call,order=None):
     global quasis, used_states, rules, best_order
@@ -558,6 +561,8 @@ def compile_function(function_call,order=None):
     states2rules(best_order)
     searches2rules(best_order)
 
+#### SYMBOL CONVERSIONS ####
+
 def sign2char(sign):
     if sign<0:
         return 'L'
@@ -580,36 +585,24 @@ def symbol2int(symbol,order):
     else:
         return int(symbol)
 
-def score(to_symbols,from_symbols,order):
-    total = 0
-    for k in to_symbols:
-        to_symbol = to_symbols[k]
-        left = False
-        right = False
-        for from_symbol in from_symbols[k]:
-            offset = symbol2int(to_symbol,order) - symbol2int(from_symbol,order)
-            if offset<0:
-                left = True
-            if offset>0:
-                right = True
-        total += (left+right)
-    return total
+#### TAPE OPTIMIZATION ####
 
 def states2searches():
     global to_symbols, from_symbols, transition_symbols
     to_symbols = {}
-    transition_symbols = {quasis[0].next_quasis[0]:{0:0}}
+    transition_symbols = {}
     for k,state in get_quasis([State]):
         if k in used_states:
             instruction = quasis[state.instruction]
-            to_symbols[k] = Symbol(instruction.vard,int(state.direction<0)) 
+            if state.instruction:
+                to_symbols[k] = Symbol(instruction.vard,int(state.direction<0)) 
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
                 if transition[3] and not adjacent_bits(instruction,next_instruction):
                     if not transition[2] in transition_symbols:
                         transition_symbols[transition[2]] = {}
                     transition_symbols[transition[2]][k] = (
-                        symbol if type(symbol)==Symbol else Symbol(instruction.vard,1/2) )
+                        symbol if type(symbol) in [Symbol,int] else Symbol(instruction.vard,1/2) )
     from_symbols = {key:set(value.values()) for key,value in transition_symbols.items()}
 
 def find_optimal_order(order):
@@ -636,7 +629,6 @@ def move_element(A,a,b):
         return A[:b]+A[a:a+1]+A[b:a]+A[a+1:]
 
 def score(order):
-    global to_symbols, from_symbols
     total = 0
     for k in from_symbols:
         to_symbol = to_symbols[k]
@@ -650,6 +642,8 @@ def score(order):
                 right = True
         total += (left+right)
     return total         
+
+#### RULE CREATION ####
 
 def states2rules(order):
     global rules
@@ -674,7 +668,7 @@ def states2rules(order):
                             sign2char(state.direction))
             for symbol,transition,end in get_quasis_from(state,[End]):
                 rules[(str(k),symbol2string(symbol,order))] = (
-                    'halt',
+                    None,
                     symbol2string(transition[0],order),
                     '')
 
@@ -682,6 +676,8 @@ def searches2rules(order):
     for k in {value[0] for value in rules.values() if value[0][-1] in ['L','R']}:
         rules[(k,None)] = (k,None,k[-1])
         rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,sign2char(quasis[int(k[:-1])].direction))
+
+#### OUTPUT ####
 
 def morphett_output():
     replacements = {'0':'0','1':'1','0\'':'2','1\'':'3'}
@@ -700,10 +696,15 @@ def morphett_output():
             replacements[key[1]] if key[1] else '*',
             replacements[value[1]] if value[1] else '*',
             value[2].lower() if value[2] else '*',
-            value[0]
+            value[0] if value[0] else 'halt'
 	]) + '\n'
     return result
-    
+
+#### TURING SIMULATOR
+
+def simulate()
+
+#### PRE-COMPILATION ####
 
 parse_files()
 link_lines()

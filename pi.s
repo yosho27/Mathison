@@ -15,7 +15,7 @@ end:
 END
 
 FUNC TEST
-ADDIs D 1
+SUBs R D
 END
 
 FUNC EULER
