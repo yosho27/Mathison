@@ -673,7 +673,7 @@ def states2rules(order):
                     '')
 
 def searches2rules(order):
-    for k in {value[0] for value in rules.values() if value[0][-1] in ['L','R']}:
+    for k in {value[0] for value in rules.values() if value[0] and value[0][-1] in ['L','R']}:
         rules[(k,None)] = (k,None,k[-1])
         rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,sign2char(quasis[int(k[:-1])].direction))
 
@@ -691,18 +691,44 @@ def morphett_output():
             replacements[var]=var
     result = ''
     for key,value in rules.items():
-        result += ' '.join([
-            key[0],
-            replacements[key[1]] if key[1] else '*',
-            replacements[value[1]] if value[1] else '*',
-            value[2].lower() if value[2] else '*',
-            value[0] if value[0] else 'halt'
-	]) + '\n'
+        if key[0]!='0':
+            result += ' '.join([
+                key[0],
+                replacements[key[1]] if key[1] else '*',
+                replacements[value[1]] if value[1] else '*',
+                value[2].lower() if value[2] else '*',
+                value[0] if value[0] else 'halt'
+            ]) + '\n'
+        else:
+            result += 'Initial state: ' + value[0] + '\n'
     return result
 
 #### TURING SIMULATOR
 
-def simulate()
+#Have all programs start on the second space on the tape
+#The initial state is found in quasis[0], with either an R or nothing
+def simulate(tape,position=1,state=None):
+    if not state:
+        state = rules[('0','0')][0]
+    steps = 0
+    while True:
+        try:
+            rule = rules[(state,tape[position])]
+        except KeyError:
+            rule = rules[(state,None)]
+        if rule[1]:
+            tape[position] = rule[1]
+        if rule[0]:
+            state = rule[0]
+        else:
+            break
+        if rule[2]=='L':
+            position-=1
+        elif rule[2]=='R':
+            position+=1
+        steps+=1
+        if steps%100000==0:
+            print(steps)
 
 #### PRE-COMPILATION ####
 
