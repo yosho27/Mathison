@@ -521,7 +521,38 @@ def merge_links():
                 replace_links(j,k)
                 altered = True
     return altered
-					
+
+#### OTHER OPTIMIZATIONS ####
+
+def skip_unreads():
+    global explored_states
+    for k,state in get_quasis([State]):
+        instruction = quasis[state.instruction]
+        if state.instruction and instruction.command=='UNREAD':
+            for _,transition,_ in get_quasis_from(state,[State,End]):
+                explored_states = set()
+                if transition[3] and  will_unread(transition[2],instruction.vard):
+                    replace_links(k,transition[2])
+
+def will_unread(k,var):
+    global explored_states
+    explored_states.add(k)
+    state = quasis[k]
+    if type(state)==State:
+        instruction = quasis[state.instruction]
+        if instruction.vard==var:
+            if instruction.command in ['LOAD','STORE']:
+                return False
+            elif instruction.command in ['NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','UNREAD']:
+                return True
+    else:
+        return True
+    for _,transition,_ in get_quasis_from(state,[State,End]):
+        if not transition[2] in explored_states:
+            if not will_unread(transition[2],var):
+                return False
+    return True
+		
 #### MAIN FUNCTION ####
 
 def compile_function(function_call,order=None):
@@ -534,17 +565,15 @@ def compile_function(function_call,order=None):
     while more_ends:
         more_ends = remove_ends()
     instructions2states()
-    more_posts,more_pres = True,True
-    while (more_posts or more_pres):
-        if more_posts:
-            more_posts = apply_posts()
-        if more_pres:
-            more_pres = apply_pres()
+    more_posts = True
+    while more_posts:
+        more_posts = apply_posts() or apply_pres()
     stitch_acc()
     skip_searches()
     more_merges = True
     while more_merges:
         more_merges = merge_links()
+    skip_unreads()
     used_states = {0}
     find_successors(0)
     directions = {}
@@ -729,6 +758,32 @@ def simulate(tape,position=1,state=None):
         steps+=1
         if steps%100000==0:
             print(steps)
+
+def create_tape(default_size,sizes={},values={}):
+    tape = []
+    for var in best_order:
+        tape.append(var)
+        size = sizes[var] if var in sizes else default_size
+        value = bin(values[var]%(2**size) if var in values else 0)[2:]
+        for k in range(1,size+1):
+            tape.append(value[-k] if k<=len(value) else '0')
+    tape.append(best_order[0])
+    return tape
+
+def get_tape_values(tape):
+    values = {}
+    var = None
+    for c in tape:
+        if c[0] in ['0','1']:
+            res += c[0]
+        else:
+            if var:
+                values[var] = int(res[::-1],2)
+            var = c
+            res = ''
+    return values
+            
+            
 
 #### PRE-COMPILATION ####
 

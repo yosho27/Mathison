@@ -41,7 +41,11 @@ end:
 END
 
 FUNC PRIME
-start:
+prime:
+SUBIs C 1
+BRANCH null end null null
+notprime:
+ADDIs N 1
 ZEROs D 0
 ADDIs D 2
 next:
@@ -50,12 +54,6 @@ SEZ R
 BRANCH null notprime null null
 ADDIs D 1
 SLT D N
-BRANCH null next null null
-SUBIs C 1
-SEZ C
-BRANCH null end null null
-notprime:
-ADDIs N 1
-JUMP start
+BRANCH prime next null prime
 end:
 END
