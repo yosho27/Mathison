@@ -35,6 +35,7 @@ END
 
 
 FUNC BOL vard var0 var1 map
+LOADI 0 ACC
 start:
 LOADNEXT var0 ACC
 LOADNEXT var1 TEMP
@@ -83,6 +84,7 @@ END
 
 
 FUNC BOLs vard var0 map
+LOADI 0 ACC
 start:
 LOADNEXT var0 ACC
 LOAD vard TEMP
@@ -96,6 +98,7 @@ END
 
 
 FUNC SLL vard var0 imm
+LOADI 0 ACC
 LOADNEXTBIG var0 TEMP
 start:
 LOADNEXTBIG var0 ACC
@@ -110,6 +113,7 @@ END
 
 
 FUNC SRL vard var0 imm
+LOADI 0 ACC
 LOADNEXT var0 TEMP
 start:
 LOADNEXT var0 ACC
@@ -124,6 +128,7 @@ END
 
 
 FUNC SLT var0 var1
+LOADI 0 ACC
 start:
 LOADNEXTBIG var0 ACC
 LOADNEXTBIG var1 TEMP
@@ -136,6 +141,7 @@ END
 
 
 FUNC MULT vard var0 var1
+LOADI 0 ACC
 start:
 LOADNEXT var0 ACC
 BRANCH shift add null null
@@ -150,6 +156,7 @@ END
 
 
 FUNC MULTo vard var0 var1
+LOADI 0 ACC
 start:
 LOADNEXT var0 ACC
 BRANCH shift add null null
@@ -169,6 +176,7 @@ END
 
 
 DIV vard varr var0 var1
+LOADI 0 ACC
 ZEROs varr 0
 start:
 SLLs varr 0
@@ -188,6 +196,7 @@ END
 
 
 FUNC MOD varr var0 var1
+LOADI 0 ACC
 ZEROs varr 0
 start:
 SLLs varr 0
@@ -204,6 +213,7 @@ END
 
 
 FUNC RECP vard varr var0
+LOADI 0 ACC
 ZEROs varr 0
 start:
 SLLs varr 1
