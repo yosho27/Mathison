@@ -3,6 +3,7 @@ from parsita import *
 from parsita.util import constant,splat
 import os
 from random import shuffle
+import json
 
 more_transitions = {
     'COMPs':{
@@ -731,6 +732,31 @@ def morphett_output():
         else:
             result += 'Initial state: ' + value[0] + '\n'
     return result
+
+def string2key(key):
+    key = key.split(' ')
+    if key[1]=='null':
+        key[1]=None
+    return tuple(key)
+
+def json_output(filename):
+    file = open(filename,'w')
+    json_rules = {
+        'initial_state':rules[('0','0')][0],
+        'rules':{str(key[0])+' '+(str(key[1]) if key[1] else 'null'):value
+                 for key,value in rules.items() if key[0]!='0'}
+    }
+    json.dump(json_rules,file)
+    file.close()
+
+def json_input(filename):
+    global rules
+    file = open(filename,'r')
+    json_rules = json.load(file)
+    rules = {string2key(key):tuple(value) for key,value in json_rules['rules'].items()}
+    rules[('0','0')] = (json_rules['initial_state'],None,'R')
+
+
 
 #### TURING SIMULATOR
 
