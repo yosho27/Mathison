@@ -215,7 +215,11 @@ def parse_files():
             function = None
             for line in lines:
                 if line:
-                    parsed_line = LineParser.line.parse(line).value
+                    try:
+                        parsed_line = LineParser.line.parse(line).value
+                    except:
+                        print('Error parsing: ',line)
+                        return
                     if function:
                         if type(parsed_line)==FunctionHeader:
                             raise Exception
