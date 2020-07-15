@@ -23,7 +23,7 @@ LOADNEXT var0 TEMP
 MAP {0x0:0, 0x1:1, 3x0:3, 3x1:0}
 LOADNEXT var1 TEMP
 MAP {0x0:0, 0x1:3, 1x0:1, 1x1:0, 3x0:3, 3x1:2}
-MAP {0:0x0, 1:0x1, 2:1x0, 3:1x1}
+MAP {0:0x0, 1:0x1, 2:3x0, 3:3x1}
 STORENEXT vard TEMP
 JUMP start
 oob: 
@@ -175,7 +175,7 @@ UNREAD var0
 END
 
 
-DIV vard varr var0 var1
+FUNC DIV vard varr var0 var1
 LOADI 0 ACC
 ZEROs varr 0
 start:
