@@ -69,11 +69,12 @@ class FunctionCall:
             next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
 
 class Instruction:
-    def __init__(self,command,read=None,big=None,vard=None,map_=None,
+    def __init__(self,command,mark=None,big=None,red=None,vard=None,map_=None,
                  labels=None,next_quasis=None,imm=None,loadto=None):
         self.command = command
-        self.read = bool(read)
+        self.mark = bool(mark)
         self.big = bool(big)
+        self.red = bool(red)
         self.vard = vard
         self.map_ = map_
         self.labels = labels
@@ -83,10 +84,12 @@ class Instruction:
 
     def __repr__(self):
         result = 'Instruction(' + self.command
-        if self.read:
+        if self.mark:
             result+='NEXT'
         if self.big:
             result+='BIG'
+        if self.red:
+            result+='RED'
         if self.vard:
             result+=', vard=' + self.vard
         if self.map_:
@@ -165,7 +168,7 @@ class LineParser(TextParsers,whitespace=None):
     arg = reg(r'[vimVIM][A-Za-z0-9_]*')
     function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
     function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
-    memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG')
+    memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG') & opt('RED')
     end = lit('END') > constant(End(False,[]))
     line = end | label | function_header | function_call
 
@@ -177,7 +180,8 @@ def functioncall2instruction(function_call):
     args = function_call.args
     instr = None
     if memory_command:
-        instr = Instruction(memory_command[0],read=memory_command[1],big=memory_command[2],vard=args[0],loadto=args[1])
+        instr = Instruction(memory_command[0],mark=memory_command[1],big=memory_command[2],
+                            red=memory_command[3],vard=args[0],loadto=args[1])
     elif command in ['UNREAD','NOTs','COMPs','SEZ']:
         instr = Instruction(command,vard=args[0])
     elif command=='JUMP':
@@ -324,6 +328,15 @@ def remove_ends():
                 pass                
     return altered    
 
+def invert_red(symbol):
+    if type(symbol)==str:
+        if symbol[-1]=='\'':
+            return symbol[:-1]
+        else:
+            return symbol+'\''
+    else:
+        return symbol
+
 def get_found_transitions(n_step,acc):
     global quasis
     instruction = quasis[n_step]
@@ -365,12 +378,15 @@ def get_found_transitions(n_step,acc):
         transitions={'0':['0' if use_temp else str(acc), acc],'1':['1' if use_temp else str(acc), acc]}
     if transitions:
         for symbol in transitions:
-            if instruction.read:
+            if instruction.mark:
                 transitions[symbol][0] += '\''
             transitions[symbol] += [instruction.next_quasis[0],True]
         transitions.update(
             {'0\'':['0\'',acc,n_step,False],'1\'':['1\'',acc,n_step,False],
             Symbol(instruction.vard,1-instruction.big):[None,acc,instruction.next_quasis[1],True]})
+        if instruction.red:
+            transitions = {invert_red(symbol):[invert_red(transition[0])]+transition[1:] for symbol,transition in transitions.items()}
+            instruction.big = 1-instruction.big
         return transitions,1-2*instruction.big
     #UNREAD
     if command=='UNREAD':
@@ -456,13 +472,16 @@ def apply_pres():
             quasis[k] = None
     return altered
 
-def adjacent_bits(instruction,next_instruction):
-    return (type(instruction)==Instruction and
+def bits_distance(instruction,next_instruction):
+    if (type(instruction)==Instruction and
             type(next_instruction)==Instruction and
             instruction.command in ['LOAD','STORE'] and
             next_instruction.command in ['LOAD','STORE'] and
             instruction.vard==next_instruction.vard and
-            instruction.big==next_instruction.big)
+            instruction.big==next_instruction.big):
+        return instruction.mark^instruction.red - next_instruction.red
+    else:
+        return None
 
 def skip_searches():
     global quasis
@@ -470,10 +489,10 @@ def skip_searches():
     for k,state in get_quasis([State]):
         instruction = quasis[state.instruction]
         command = instruction.command if state.instruction else None
-        if command in ['LOAD','STORE'] and not instruction.read:
+        if command in ['LOAD','STORE']:
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if k!=transition[2] and adjacent_bits(instruction,next_instruction):
+                if transition[3] and bits_distance(instruction,next_instruction)==0: #CHANGED from transition[2]!=k
                     next_symbol = transition[0] if transition[0] else symbol
                     state.transitions[symbol] = next_state.transitions[next_symbol]
                     altered = True
@@ -632,7 +651,7 @@ def states2searches():
                 to_symbols[k] = Symbol(instruction.vard,int(state.direction<0)) 
             for symbol,transition,next_state in get_quasis_from(state,[State]):
                 next_instruction = quasis[next_state.instruction]
-                if transition[3] and not adjacent_bits(instruction,next_instruction):
+                if transition[3] and bits_distance(instruction,next_instruction)==None:
                     if not transition[2] in transition_symbols:
                         transition_symbols[transition[2]] = {}
                     transition_symbols[transition[2]][k] = (
@@ -679,6 +698,12 @@ def score(order):
 
 #### RULE CREATION ####
 
+def add_rule(key0,key1,value):
+    global rules
+    if not key0 in rules:
+        rules[key0] = {}
+    rules[key0][key1] = value
+
 def states2rules(order):
     global rules
     rules = {}
@@ -691,25 +716,25 @@ def states2rules(order):
                     current_var = symbol2int(transition_symbols[transition[2]][k],order)
                     next_var = symbol2int(to_symbols[transition[2]],order)
                     direction = sign2char(next_var-current_var)
-                    rules[(str(k),symbol2string(symbol,order))] = (
+                    add_rule(str(k), symbol2string(symbol,order), (
                              str(transition[2])+direction,
                              symbol2string(transition[0],order),
-                             direction if direction else sign2char(next_state.direction))
+                             direction if direction else sign2char(next_state.direction)))
                 else:
-                    rules[(str(k),symbol2string(symbol,order))] = (
+                    add_rule(str(k), symbol2string(symbol,order), (
                             str(transition[2]),
                             symbol2string(transition[0],order),
-                            sign2char(state.direction))
+                            sign2char(next_state.direction))) #CHANGED from state to next_state
             for symbol,transition,end in get_quasis_from(state,[End]):
-                rules[(str(k),symbol2string(symbol,order))] = (
+                add_rule(str(k), symbol2string(symbol,order), (
                     None,
                     symbol2string(transition[0],order),
-                    '')
+                    ''))
 
 def searches2rules(order):
-    for k in {value[0] for value in rules.values() if value[0] and value[0][-1] in ['L','R']}:
-        rules[(k,None)] = (k,None,k[-1])
-        rules[(k,symbol2string(to_symbols[int(k[:-1])],order))] = (k[:-1],None,sign2char(quasis[int(k[:-1])].direction))
+    for k in {value[0] for key in rules for value in rules[key].values() if value[0] and value[0][-1] in ['L','R']}:
+        add_rule(k, None, (k,None,k[-1]))
+        add_rule(k, symbol2string(to_symbols[int(k[:-1])],order), (k[:-1],None,sign2char(quasis[int(k[:-1])].direction)))
 
 #### OUTPUT ####
 
@@ -724,41 +749,38 @@ def morphett_output():
         else:
             replacements[var]=var
     result = ''
-    for key,value in rules.items():
-        if key[0]!='0':
-            result += ' '.join([
-                key[0],
-                replacements[key[1]] if key[1] else '*',
-                replacements[value[1]] if value[1] else '*',
-                value[2].lower() if value[2] else '*',
-                value[0] if value[0] else 'halt'
-            ]) + '\n'
-        else:
-            result += 'Initial state: ' + value[0] + '\n'
+    for key0 in rules:
+        for key1,value in rules[key0].items():
+            if key0!='0':
+                result += ' '.join([
+                    key0,
+                    replacements[key1] if key1 else '*',
+                    replacements[value[1]] if value[1] else '*',
+                    value[2].lower() if value[2] else '*',
+                    value[0] if value[0] else 'halt'
+                ]) + '\n'
+            else:
+                result += 'Initial state: ' + value[0] + '\n'
     return result
-
-def string2key(key):
-    key = key.split(' ')
-    if key[1]=='null':
-        key[1]=None
-    return tuple(key)
 
 def json_output(filename):
     file = open(filename,'w')
     json_rules = {
-        'initial_state':rules[('0','0')][0],
-        'rules':{str(key[0])+' '+(str(key[1]) if key[1] else 'null'):value
-                 for key,value in rules.items() if key[0]!='0'}
+        'initial_state':rules['0']['0'][0],
+        'rules':{key:value for key,value in rules.items() if key!='0'},
+        'order':best_order
     }
     json.dump(json_rules,file)
     file.close()
 
 def json_input(filename):
-    global rules
+    global rules, best_order
     file = open(filename,'r')
     json_rules = json.load(file)
-    rules = {string2key(key):tuple(value) for key,value in json_rules['rules'].items()}
-    rules[('0','0')] = (json_rules['initial_state'],None,'R')
+    rules = {key0:{(None if key1=='null' else key1):tuple(value) for key1,value
+           in json_rules['rules'][key0].items()} for key0 in json_rules['rules']}
+    add_rule('0', '0', (json_rules['initial_state'],None,'R'))
+    best_order = json_rules['order']
 
 
 
@@ -768,13 +790,13 @@ def json_input(filename):
 #The initial state is found in quasis[0], with either an R or nothing
 def simulate(tape,position=1,state=None):
     if not state:
-        state = rules[('0','0')][0]
+        state = rules['0']['0'][0]
     steps = 0
     while True:
         try:
-            rule = rules[(state,tape[position])]
+            rule = rules[state][tape[position]]
         except KeyError:
-            rule = rules[(state,None)]
+            rule = rules[state][None]
         if rule[1]:
             tape[position] = rule[1]
         if rule[0]:
@@ -786,7 +808,7 @@ def simulate(tape,position=1,state=None):
         elif rule[2]=='R':
             position+=1
         steps+=1
-        if steps%100000==0:
+        if steps%1000000==0:
             print(steps)
 
 def create_tape(default_size,sizes={},values={}):
