@@ -446,7 +446,7 @@ def get_found_transitions(n_step,acc):
             transitions[symbol] += [instruction.next_quasis[0],True]
         transitions.update(
             {'0\'':['0\'',acc,n_step,False],'1\'':['1\'',acc,n_step,False],
-            Symbol(instruction.vard,1-instruction.big):[None,acc,instruction.next_quasis[1],True]})
+            Symbol(instruction.vard,1-instruction.big^instruction.red):[None,acc,instruction.next_quasis[1],True]})
         if instruction.red:
             transitions = {invert_red(symbol):[invert_red(transition[0])]+transition[1:] for symbol,transition in transitions.items()}
             instruction.big = 1-instruction.big
@@ -591,8 +591,9 @@ def skip_searches():
                 next_instruction = quasis[next_state.instruction]
                 if transition[3] and bits_distance(instruction,next_instruction)==0: #CHANGED from transition[2]!=k
                     next_symbol = transition[0] if transition[0] else symbol
-                    state.transitions[symbol] = next_state.transitions[next_symbol]
-                    altered = True
+                    if type(next_symbol)==str: 
+                        state.transitions[symbol] = next_state.transitions[next_symbol]
+                        altered = True
     return altered                        
                     
 
