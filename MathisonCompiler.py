@@ -432,6 +432,7 @@ def get_found_transitions(n_step,acc):
     #SEZ
     if command=='SEZ':
         return {'0':['0',1,n_step,False],'1':['1',0,instruction.next_quasis[0],True],
+                '0\'':['0\'',1,n_step,False],'1\'':['1\'',0,instruction.next_quasis[0],True],
                      Symbol(instruction.vard,+1):[None,1,instruction.next_quasis[0],True]},+1
     #All LOAD and STORE commands
     use_temp = instruction.loadto=='TEMP'
@@ -449,8 +450,7 @@ def get_found_transitions(n_step,acc):
             Symbol(instruction.vard,1-instruction.big^instruction.red):[None,acc,instruction.next_quasis[1],True]})
         if instruction.red:
             transitions = {invert_red(symbol):[invert_red(transition[0])]+transition[1:] for symbol,transition in transitions.items()}
-            instruction.big = 1-instruction.big
-        return transitions,1-2*instruction.big
+        return transitions,1-2*(instruction.big^instruction.red)
     #UNREAD
     if command=='UNREAD':
         return {'0':['0',acc,n_step,False],'1':['1',acc,n_step,False],
@@ -520,8 +520,8 @@ def apply_posts():
                 size = validate_maps(next_instr.map_)
                 if size==(2,1):
                     assert instruction.command=='LOAD' and instruction.loadto=='TEMP'
-                    if (transition[1],int(symbol)) in next_instr.map_:
-                        transition[1] = next_instr.map_[(transition[1],int(symbol))][0]
+                    if (transition[1],int(symbol[0])) in next_instr.map_:
+                        transition[1] = next_instr.map_[(transition[1],int(symbol[0]))][0]
                     state_change = 0
                 elif size==(1,1):
                     if (transition[1],) in next_instr.map_:
@@ -906,7 +906,7 @@ def morphett_output():
     k = 97
     for var in best_order:
         if len(var)>1:
-            while chr(k) in best_order:
+            while chr(k) in best_order or chr(k) in replacements.values():
                 k+=1
             replacements[var]=chr(k)
         else:
@@ -959,7 +959,10 @@ def simulate(tape,position=1,state=None):
         try:
             rule = rules[state][tape[position]]
         except KeyError:
-            rule = rules[state][None]
+            try:
+                rule = rules[state][None]
+            except KeyError:
+                print(state)
         if rule[1]:
             tape[position] = rule[1]
         if rule[0]:
