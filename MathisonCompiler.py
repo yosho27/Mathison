@@ -174,6 +174,10 @@ class LineParser(TextParsers,whitespace=None):
 
 #### PRE-COMPILATION FUNCTIONS ####
 
+'''
+Given a FunctionCall
+Return either an Instruction if it's a primitive or itself otherwise
+'''
 def functioncall2instruction(function_call):
     command = function_call.command
     memory_command = is_memory_command(command)
@@ -200,6 +204,10 @@ def functioncall2instruction(function_call):
     else:
         return function_call
 
+'''
+Given the lines from a function body, an initial index of a line, and a label to search for (or 'null'),
+Return the index of the next FunctionCall or End in the lines of the function body
+'''
 def find_next_function(lines,k,label):
     for j in range(k,len(lines)):
         if label=='null':
@@ -210,6 +218,10 @@ def find_next_function(lines,k,label):
                 label='null'
     return find_next_function(lines,k,'null')
 
+'''
+Populate the global functions with FunctionHeader's
+Each FunctionHeader's lines consists of End's, Label's, and FunctionCall's
+'''
 def parse_files():
     global functions
     for filename in os.listdir():
@@ -238,6 +250,12 @@ def parse_files():
                             function = parsed_line
                             function.lines = [End(True,[])]
 
+'''
+Given a command name, if it's a memory command,
+return a list in which the first element is 'LOAD' or 'STORE', and the next 3 elements are lists with 0 or 1 element,
+    corresponding to 'NEXT', 'BIG', and 'RED'
+if it's non a memory command, return None
+'''
 def is_memory_command(command):
     memory_command = LineParser.memory_command.parse(command)
     if type(memory_command)==Success:
@@ -245,6 +263,11 @@ def is_memory_command(command):
     else:
         return None
 
+'''
+Set the value of next_quasis for each FunctionCall and End in the lines of a FunctionHeader
+next_quasis is always a list of 0 (end of the function body), 1 (normal), 2 (memory commands),
+    or 4 (branches) indices to other lines within the function header
+'''
 def link_lines():
     global functions
     for function in functions:
@@ -264,12 +287,22 @@ def link_lines():
 
 #### GENERATORS ####
 
+'''
+Given a list of types
+Find quasis of that type
+Yield (index within quasis),(the quasis itself)
+'''
 def get_quasis(types=[FunctionCall,Instruction,State,End]):
     global quasis
     for k,quasi in enumerate(quasis):
         if type(quasi) in types:
             yield k,quasi
 
+'''
+Given a quasi and a list of types
+Find the quasis that it links to
+Yield (index within next_quasis or symbol to trigger transition),(transition array or index within quasis),(the next quasi itself)
+'''
 def get_quasis_from(quasi,types=[FunctionCall,Instruction,State,End]):
     global quasis
     if type(quasi)==State and quasi.transitions:
@@ -286,13 +319,27 @@ def get_quasis_from(quasi,types=[FunctionCall,Instruction,State,End]):
                 elif State in types:
                     yield from get_states_of(next_quasi)
 
+'''
+Given an index within quasis
+Find all states that correspond to that quasi
+Yield (index within quasis),(the state itself)
+'''
 def get_states_of(n_step):
     for k,state in get_quasis([State]):
         if state.instruction == n_step:
             yield k,state
 
 #### COMPILATION FUNCTIONS ####
-            
+
+'''
+Given a FunctionCall,
+allocate space in quasis for each line in the corresponding FunctionHeader
+populate the space with FunctionCall's or Instruction's,
+replacing the variable names with those passed in when possible
+linking the quasis so the line before a FunctionCall links to the FunctionCall which links
+    to the first End in the function body which links within the function and the last End in
+    the body links to the line after the FunctionCall
+'''
 def evaluate_function_call(function_call):
     global functions, quasis
     for function in functions:
@@ -301,7 +348,6 @@ def evaluate_function_call(function_call):
             index = len(quasis)
             argsdict = dict(zip(function.params,function_call.args))
             quasis += [None]*len(function.lines)
-            replacements = []
             for k,line in enumerate(function.lines):
                 if type(line)==FunctionCall:
                     new_function = functioncall2instruction(line.apply(index,argsdict))
@@ -316,6 +362,14 @@ def evaluate_function_call(function_call):
                     else:
                         quasis[index+k] = End(False,function_call.next_quasis)
 
+'''
+Modify linkage within quasis
+line before -> function call -> first end -> function body ... function body -> last end -> line after
+becomes
+line before -> function body ... function body -> line after
+
+quasis consists of just Instruction's and 2 End's
+'''
 def remove_ends():
     global quasis
     altered = False
@@ -328,6 +382,10 @@ def remove_ends():
                 pass                
     return altered    
 
+'''
+Given a string, return it toggling whether or not it ends in a prime
+Given a Symbol, return it
+'''
 def invert_red(symbol):
     if type(symbol)==str:
         if symbol[-1]=='\'':
@@ -337,6 +395,11 @@ def invert_red(symbol):
     else:
         return symbol
 
+'''
+Given an index of an Instruction in quasis and an acc value (0, 1, 2, or 3)
+Return a dictionary where the key is a Symbol or string and the values are a transition array
+[symbol to write or None, next acc value, next Instruction index, whether or not this is going to a new instruction]
+'''
 def get_found_transitions(n_step,acc):
     global quasis
     instruction = quasis[n_step]
@@ -394,6 +457,9 @@ def get_found_transitions(n_step,acc):
                 '0\'':['0',acc,n_step,False],'1\'':['1',acc,n_step,False],
                      Symbol(instruction.vard,0):[None,acc,instruction.next_quasis[0],True]},-1
 
+'''
+Replace any links to the quasi index a with a link to the quasi index b
+'''
 def replace_links(a,b):
     global quasis
     for _,quasi in get_quasis([Instruction,End]):
@@ -405,6 +471,11 @@ def replace_links(a,b):
             if quasi.transitions[symbol][2] == a:
                 quasi.transitions[symbol][2] = b
 
+'''
+For each Instruction in quasis, add a State for each possible ACC value with the appropriate transitions
+Transitions are still to Instructions, not other states
+Also replace the first End with a State
+'''
 def instructions2states():
     global quasis
     quasis[0] = State(instruction=0,acc=0,
@@ -416,12 +487,21 @@ def instructions2states():
                 transitions,direction = get_found_transitions(k,acc)
                 quasis.append(State(instruction=k,acc=acc,transitions=transitions,direction=direction))
                 
-
+'''
+Given a map, return a tuple representing its dimensions
+Throws an error if the map is invalid
+'''
 def validate_maps(map_):
     sizes = {(len(key),len(map_[key])) for key in map_}    
     assert len(sizes)==1
     return sizes.pop()
 
+'''
+Change the transition arrays of State's based on JUMP, BRANCH, LOADI ACC, and MAP Instructions they link to
+May change the ACC value and index of quasi that it links to
+Returns whether or not things were altered
+After an instruction is applied, states will no longer link to it
+'''
 def apply_posts():
     global quasis
     altered = False
@@ -452,6 +532,13 @@ def apply_posts():
                 altered = True
     return altered
 
+'''
+Change the transition arrays of State's based on LOADI TEMP, and MAP Instructions that link to them
+    (that link to instructions that they correspond to)
+May change the ACC value and what symbol it writes
+Returns whether or not things were altered
+After an instruction is applied, it is deleted
+'''
 def apply_pres():
     global quasis
     altered = False
@@ -472,6 +559,11 @@ def apply_pres():
             quasis[k] = None
     return altered
 
+'''
+Given two instructions, determine whether they act on the same or adjacent bits
+Return 0 if it's the same bit, or 1 if it's the next bit (with respect to the direction of the second instructions)
+    or None if it's neither for any reason
+'''
 def bits_distance(instruction,next_instruction):
     if (type(instruction)==Instruction and
             type(next_instruction)==Instruction and
@@ -479,10 +571,15 @@ def bits_distance(instruction,next_instruction):
             next_instruction.command in ['LOAD','STORE'] and
             instruction.vard==next_instruction.vard and
             instruction.big==next_instruction.big):
-        return instruction.mark^instruction.red - next_instruction.red
+        return int(instruction.mark^instruction.red^next_instruction.red)
     else:
         return None
 
+'''
+Merge states that will act on the same bit by replacing the transition array of one state
+with the transition array of the state it will link to using whatever the symbol and acc will be
+Returns whether or not things were altered
+'''
 def skip_searches():
     global quasis
     altered = False
@@ -499,7 +596,10 @@ def skip_searches():
     return altered                        
                     
 
-
+'''
+Given an ACC value and the index of an Instruction within quasis
+Return the index of the corresponding State within quasis
+'''
 def find_state(acc,n_step):
     global quasis
     if type(quasis[n_step])==Instruction:
@@ -509,6 +609,10 @@ def find_state(acc,n_step):
     else:
         return step
 
+'''
+Given the ACC value from the last instruction and the index of an Instruction within quasis
+Return what the value of the ACC should start as for the new instruction
+'''
 def get_init_acc(acc,n_step):
     instruction = quasis[n_step]
     command,imm = instruction.command,instruction.imm
@@ -519,6 +623,11 @@ def get_init_acc(acc,n_step):
     elif command in ['SLLs','SRLs','SLL2s','SRL2s','ADDIs','SUBIs']:
         return imm
 
+'''
+Change the transition array of each state so it goes to another state instead of to an Instruction
+
+quasis consists of States and an End
+'''
 def stitch_acc():
     global quasis
     for _,state in get_quasis([State]):
@@ -527,6 +636,10 @@ def stitch_acc():
                 get_init_acc(transition[1],transition[2]) if transition[3] else transition[1],
                 transition[2])
 
+'''
+Add the indices of all states that can be reached from the state
+with index k to the set used_states
+'''
 def find_successors(k):
     global quasis,used_states
     for _,j,_ in get_quasis_from(quasis[k],[End,State]):
@@ -536,6 +649,11 @@ def find_successors(k):
                 used_states.add(j)
                 find_successors(j)
 
+'''
+Merge any states that, for each symbol, write the same thing, and either go to the same
+state or both go to themselves
+Returns whether or not things were altered
+'''
 def merge_links():
     altered = False
     for k,state1 in get_quasis([State]):
@@ -548,6 +666,9 @@ def merge_links():
 
 #### OTHER OPTIMIZATIONS ####
 
+'''
+Skip unecessary unreads
+'''
 def skip_unreads():
     global explored_states
     for k,state in get_quasis([State]):
@@ -558,6 +679,11 @@ def skip_unreads():
                 if transition[3] and  will_unread(transition[2],instruction.vard):
                     replace_links(k,transition[2])
 
+'''
+Given the index of a State in quasis and a variable name
+Return if it will definitely reach a command that will unread that variable before
+reaching a memory command on that variable
+'''
 def will_unread(k,var):
     global explored_states
     explored_states.add(k)
@@ -616,6 +742,10 @@ def compile_function(function_call,order=None):
 
 #### SYMBOL CONVERSIONS ####
 
+'''
+Given a number,
+return 'L', 'R', or '' if it's less than, greater than, or equal to zero
+'''
 def sign2char(sign):
     if sign<0:
         return 'L'
@@ -624,6 +754,10 @@ def sign2char(sign):
     else:
         return ''
 
+'''
+Given a Symbol or string and the order of variables on the tape,
+Return the string
+'''
 def symbol2string(symbol,order):
     if type(symbol)==Symbol:
         return order[(order.index(symbol.symbol)+symbol.offset)%len(order)]
@@ -632,6 +766,10 @@ def symbol2string(symbol,order):
     else:
         return str(symbol)
 
+'''
+Given a Symbol or int,
+Return the position on the tape
+'''
 def symbol2int(symbol,order):
     if type(symbol)==Symbol:
         return order.index(symbol.symbol)+symbol.offset
@@ -640,6 +778,12 @@ def symbol2int(symbol,order):
 
 #### TAPE OPTIMIZATION ####
 
+'''
+Create the following dictionaries for transitions that require searches:
+to_symbols: maps a state to the symbol it goes to when going to that state
+transition_symbols: maps a state it's going to to a map that maps a state it's coming from to the symbol that caused the transition
+from_symbols: maps a state to the set of symbols that it could've read before going to that state
+'''
 def states2searches():
     global to_symbols, from_symbols, transition_symbols
     to_symbols = {}
@@ -658,6 +802,10 @@ def states2searches():
                         symbol if type(symbol) in [Symbol,int] else Symbol(instruction.vard,1/2) )
     from_symbols = {key:set(value.values()) for key,value in transition_symbols.items()}
 
+'''
+Given an initial order performs hill climbing to find an order with a better score
+Returns the best order found and its score
+'''
 def find_optimal_order(order):
     best_order = order
     original_score = score(order)
@@ -674,13 +822,21 @@ def find_optimal_order(order):
         return find_optimal_order(best_order)
     else:
         return best_order,best_score
-    
+
+'''
+Given a list and indices a and b
+Return the list with the element at a moved to be before the element at b
+'''
 def move_element(A,a,b):
     if b>a+1:
         return A[:a]+A[a+1:b]+A[a:a+1]+A[b:]
     elif b<a:
         return A[:b]+A[a:a+1]+A[b:a]+A[a+1:]
 
+'''
+Given a potential order, using from_symbols and two_symbols
+Return the number of search states needed
+'''
 def score(order):
     total = 0
     for k in from_symbols:
@@ -704,6 +860,9 @@ def add_rule(key0,key1,value):
         rules[key0] = {}
     rules[key0][key1] = value
 
+'''
+Add rules to the 2D dict, either from a state to a search state or from a state to another state
+'''
 def states2rules(order):
     global rules
     rules = {}
@@ -731,6 +890,9 @@ def states2rules(order):
                     symbol2string(transition[0],order),
                     ''))
 
+'''
+Add rules to the 2D dict, from search states to states
+'''
 def searches2rules(order):
     for k in {value[0] for key in rules for value in rules[key].values() if value[0] and value[0][-1] in ['L','R']}:
         add_rule(k, None, (k,None,k[-1]))
