@@ -1,0 +1,43 @@
+FUNC HOFSTADER_G
+
+g:
+SEZ G
+BRANCH null base null null
+
+LOADI 0 ACC
+push:
+STORENEXT sp ACC
+LOADNEXT G ACC
+JUMP push
+oob:
+UNREAD G
+
+SUBIs G 1
+LOADI 0 TEMP
+STORENEXT sp TEMP
+JUMP g
+return0:
+LOADI 1 TEMP
+STORENEXT sp TEMP
+JUMP g
+return1:
+
+LOADI 0 ACC
+pop:
+LOADNEXTRED sp ACC
+STORENEXTBIG N ACC
+JUMP pop
+oob:
+UNREAD N
+
+NSUBs G N
+JUMP return
+base:
+ZEROs G 0
+
+return:
+LOADNEXTRED sp ACC
+BRANCH return0 return1 null null
+
+oob:
+END

@@ -492,6 +492,8 @@ Given a map, return a tuple representing its dimensions
 Throws an error if the map is invalid
 '''
 def validate_maps(map_):
+    if not map_:
+        return (1,1)
     sizes = {(len(key),len(map_[key])) for key in map_}    
     assert len(sizes)==1
     return sizes.pop()
@@ -962,7 +964,8 @@ def simulate(tape,position=1,state=None):
             try:
                 rule = rules[state][None]
             except KeyError:
-                print(state)
+                print('Error on state: ',state,' at position: ',position)
+                return
         if rule[1]:
             tape[position] = rule[1]
         if rule[0]:

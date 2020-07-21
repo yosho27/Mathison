@@ -83,6 +83,23 @@ UNREAD vard
 END
 
 
+FUNC NSUBs vard var0
+LOADI 0 ACC
+start:
+LOADNEXT var0 TEMP
+MAP {0x0:0, 0x1:1, 3x0:3, 3x1:0}
+LOAD vard TEMP
+MAP {0x0:0, 0x1:3, 1x0:1, 1x1:0, 3x0:3, 3x1:2}
+MAP {0:0x0, 1:0x1, 2:3x0, 3:3x1}
+STORENEXT vard TEMP
+JUMP start
+oob: 
+MAP {0:0, 1:1, 2:1, 3:1}
+UNREAD var0
+UNREAD vard
+END
+
+
 FUNC BOLs vard var0 map
 LOADI 0 ACC
 start:

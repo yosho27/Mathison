@@ -34,7 +34,7 @@ END
 
 FUNC EULER
 start:
-BOLs f F {0x0:0, 0x1:0, 1x0:1, 1x1:1}
+BOLs f F {}
 ZEROs F 0
 MULTo F N f
 BRANCH null end null null
