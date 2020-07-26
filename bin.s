@@ -3,7 +3,7 @@ FUNC BIN0
 SUB NK N K
 
 factA:
-SEZ N
+LEQZ N
 BRANCH null returnA null null
 BOLs f FA {}
 ZEROs FA 0
@@ -13,7 +13,7 @@ JUMP factA
 returnA:
 
 factB:
-SEZ K
+LEQZ K
 BRANCH null returnB null null
 BOLs f FA {}
 DIV FA varr f K
@@ -22,7 +22,7 @@ JUMP factB
 returnB:
 
 factC:
-SEZ NK
+LEQZ NK
 BRANCH null returnC null null
 BOLs f FA {}
 DIV FA varr f NK
@@ -36,7 +36,7 @@ END
 
 FUNC BIN1
 bin:
-SEZ K
+LEQZ K
 BRANCH null base null null
 SLT K N
 BRANCH base null null null
@@ -72,21 +72,21 @@ END
 FUNC TRIN1
 
 trin:
-SEZ K
+LEQZ K
 BRANCH null baseK null null
-SEZ J
+LEQZ J
 BRANCH notbase baseKorJ null null
 baseK:
-SEZ J
+LEQZ J
 BRANCH null base null null
 baseKorJ:
-SEZ I
+LEQZ I
 BRANCH null base null null
 notbase:
 
 SUBIs N 1
 
-SEZ I
+LEQZ I
 BRANCH null skipI null null
 SUBIs I 1
 LOADI 0 TEMP
@@ -98,7 +98,7 @@ return00:
 ADDIs I 1
 skipI:
 
-SEZ K
+LEQZ K
 BRANCH null skipK null null
 SUBIs K 1
 LOADI 0 TEMP
@@ -110,7 +110,7 @@ return01:
 ADDIs K 1
 skipK:
 
-SEZ J
+LEQZ J
 BRANCH null skipJ null null
 SUBIs J 1
 LOADI 1 TEMP

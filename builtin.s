@@ -244,3 +244,23 @@ JUMP start
 oob:
 UNREAD vard
 END
+
+
+FUNC PUSH var0
+LOADI 0 ACC
+push:
+STORENEXTRED sp ACC
+LOADNEXTBIG var0 ACC
+JUMP push
+oob:
+UNREAD var0
+END
+
+
+FUNC UNREADSP var0
+start:
+LOADNEXTRED sp TEMP
+LOADNEXTRED var0 TEMP
+JUMP start
+oob:
+END

@@ -14,22 +14,8 @@ oob:
 END
 
 FUNC TEST
-a:
-LOADNEXT A TEMP
-JUMP a
-oob:
-b:
-LOADNEXTRED A TEMP
-JUMP b
-oob:
-c:
-LOADNEXTBIG B TEMP
-JUMP c
-oob:
-d:
-LOADNEXTBIGRED B TEMP
-JUMP d
-oob:
+IS1OR2 N
+STORE S ACC
 END
 
 FUNC EULER
@@ -55,7 +41,7 @@ ZEROs D 0
 ADDIs D 2
 next:
 MOD R N D
-SEZ R
+LEQZ R
 BRANCH null notprime null null
 ADDIs D 1
 SLT D N

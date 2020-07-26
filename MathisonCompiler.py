@@ -51,6 +51,7 @@ quasis = []
 
 @dataclass
 class FunctionHeader:
+    func_type: str
     command: str
     params: list #the type of argument is defined by the first letter,
     #           'v' for variable, 'i' for immediate, 'm' for map
@@ -65,8 +66,18 @@ class FunctionCall:
     def apply(self,index,argsdict):
         return FunctionCall(
             command=self.command,
-            args=[(argsdict[arg] if (type(arg)==str and arg in argsdict) else arg) for arg in self.args],
+            args=[self.apply_arg(argsdict,arg) for arg in self.args],
             next_quasis=[index+next_quasi for next_quasi in self.next_quasis])
+
+    def apply_arg(self,argsdict,arg):
+        if (type(arg)==str and arg in argsdict):
+            param = argsdict[arg]
+            if param in ['$POP','$TOP']:
+                return 'sp'
+            else:
+                return param
+        else:
+            return arg
 
 class Instruction:
     def __init__(self,command,mark=None,big=None,red=None,vard=None,map_=None,
@@ -81,6 +92,7 @@ class Instruction:
         self.next_quasis = next_quasis
         self.imm = imm
         self.loadto = loadto
+        self.is_prim = False
 
     def __repr__(self):
         result = 'Instruction(' + self.command
@@ -155,6 +167,8 @@ class ImmParser(TextParsers,whitespace=None):
     imm2d = reg(r'[0123]') > int
     imm2b = reg(r'[01]{2}') > (lambda x: int(x,2))
     imm2 = imm2b | imm2d
+    imm4d = reg(r'[0-7]|(-[0-8])') > (lambda x: bin(int(x,2))[2:])
+    imm4b = reg(r'[01]{4}')
 
 class MapParser(TextParsers):
     state = ImmParser.imm2 & opt('x' >> ImmParser.imm1) > (lambda x: tuple([x[0]]+x[1]))
@@ -165,9 +179,9 @@ class LineParser(TextParsers,whitespace=None):
     s = reg(r'[ \t]+')
     valid = reg(r'[A-Za-z][A-Za-z0-9_]*')
     label = valid << ':' > Label
-    arg = reg(r'[vimVIM][A-Za-z0-9_]*')
-    function_header = 'FUNC' >>s>> valid & rep(s >> arg) > splat(FunctionHeader)
-    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid)) > splat(FunctionCall)
+    #arg = reg(r'[vimVIM][A-Za-z0-9_]*')
+    function_header = lit('FUNC','PRIM') &s>> valid & rep(s >> valid) > splat(FunctionHeader)
+    function_call = valid & rep(s >> (MapParser.map_ | ImmParser.imm2 | valid | '$POP' | '$TOP')) > splat(FunctionCall)
     memory_command = lit('LOAD','STORE') & opt('NEXT') & opt('BIG') & opt('RED')
     end = lit('END') > constant(End(False,[]))
     line = end | label | function_header | function_call
@@ -186,7 +200,7 @@ def functioncall2instruction(function_call):
     if memory_command:
         instr = Instruction(memory_command[0],mark=memory_command[1],big=memory_command[2],
                             red=memory_command[3],vard=args[0],loadto=args[1])
-    elif command in ['UNREAD','NOTs','COMPs','SEZ']:
+    elif command in ['UNREAD','NOTs','COMPs','LEQZ']:
         instr = Instruction(command,vard=args[0])
     elif command=='JUMP':
         instr = Instruction(command,labels=[args[0]])
@@ -344,13 +358,30 @@ def evaluate_function_call(function_call):
     global functions, quasis
     for function in functions:
         if function.command==function_call.command:
-            assert len(function.params)==len(function_call.args)
+            try:
+                assert len(function.params)==len(function_call.args)
+            except AssertionError:
+                print('Wrong number of arguments on ',function,function_call)
+                1/0
             index = len(quasis)
             argsdict = dict(zip(function.params,function_call.args))
             quasis += [None]*len(function.lines)
             for k,line in enumerate(function.lines):
                 if type(line)==FunctionCall:
+                    is_prim = function.func_type=='PRIM'
+                    if is_prim:
+                        assert line.command in ['LOAD','LOADNEXT','STORE','STORENEXT','MAP','JUMP','BRANCH','LOADI']
+                        if line.command in ['LOAD','LOADNEXT','STORE','STORENEXT']:
+                            assert line.args[0]==function.params[0]
+                    if line.command=='UNREAD':
+                        if argsdict[line.args[0]] in ['$POP','$TOP']:
+                            quasis[index+k] = End(True,[index+line.next_quasis[0]])
+                            continue
+                        if line.args[0]==function.params[0] and '$TOP' in function_call.args:
+                            line = FunctionCall('UNREADSP',line.args,line.next_quasis)
                     new_function = functioncall2instruction(line.apply(index,argsdict))
+                    if is_prim:
+                        new_function.is_prim = True
                     quasis[index+k] = new_function
                     if type(new_function)==FunctionCall:
                         new_index = len(quasis)
@@ -411,14 +442,14 @@ def get_found_transitions(n_step,acc):
     elif command=='ZEROs':
         imm = str(instruction.imm)
         transitions={'0':[imm,acc],'1':[imm,acc]}
-    #"Other primitive commands" except SEZ and ACC-preserving
+    #"Other primitive commands" except LEQZ and ACC-preserving
     elif command in more_transitions.keys():
         if acc in more_transitions[command].keys():
             transitions = more_transitions[command][acc]
             transitions = {symbol:transitions[symbol][:] for symbol in transitions}
         else:
             return {},None
-    #"Other primitive commands" except SEZ
+    #"Other primitive commands" except LEQZ
     if command in ['SRLs','SRL2s','ZEROs']:
         direction = 0
     else:
@@ -429,8 +460,8 @@ def get_found_transitions(n_step,acc):
         transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
         transitions[Symbol(instruction.vard,direction)] = [None,acc,instruction.next_quasis[0],True]
         return transitions,2*direction-1
-    #SEZ
-    if command=='SEZ':
+    #LEQZ
+    if command=='LEQZ':
         return {'0':['0',1,n_step,False],'1':['1',0,instruction.next_quasis[0],True],
                 '0\'':['0\'',1,n_step,False],'1\'':['1\'',0,instruction.next_quasis[0],True],
                      Symbol(instruction.vard,+1):[None,1,instruction.next_quasis[0],True]},+1
@@ -442,12 +473,18 @@ def get_found_transitions(n_step,acc):
         transitions={'0':['0' if use_temp else str(acc), acc],'1':['1' if use_temp else str(acc), acc]}
     if transitions:
         for symbol in transitions:
-            if instruction.mark:
+            if instruction.mark and not instruction.is_prim:
                 transitions[symbol][0] += '\''
             transitions[symbol] += [instruction.next_quasis[0],True]
-        transitions.update(
-            {'0\'':['0\'',acc,n_step,False],'1\'':['1\'',acc,n_step,False],
-            Symbol(instruction.vard,1-instruction.big^instruction.red):[None,acc,instruction.next_quasis[1],True]})
+        if instruction.is_prim:
+            transitions.update({symbol+'\'':transitions[symbol] for symbol in transitions})
+            transitions[Symbol(instruction.vard,1)] = [None,acc,instruction.next_quasis[1],True]
+        else:            
+            transitions.update({
+                '0\'':['0\'',acc,n_step,False],
+                '1\'':['1\'',acc,n_step,False],
+                Symbol(instruction.vard,1-instruction.big^instruction.red):[None,acc,instruction.next_quasis[1],True]
+                })
         if instruction.red:
             transitions = {invert_red(symbol):[invert_red(transition[0])]+transition[1:] for symbol,transition in transitions.items()}
         return transitions,1-2*(instruction.big^instruction.red)
@@ -456,6 +493,18 @@ def get_found_transitions(n_step,acc):
         return {'0':['0',acc,n_step,False],'1':['1',acc,n_step,False],
                 '0\'':['0',acc,n_step,False],'1\'':['1',acc,n_step,False],
                      Symbol(instruction.vard,0):[None,acc,instruction.next_quasis[0],True]},-1
+    if command=='LEQI':
+        imm = instruction.imm
+        if -1<=imm<1:
+            pass
+        elif -2<=imm<2:
+            pass
+        elif -4<=imm<4:
+            pass
+        elif -8<=imm<8:
+            pass
+        transitions = {}
+        
 
 '''
 Replace any links to the quasi index a with a link to the quasi index b
@@ -482,7 +531,7 @@ def instructions2states():
                       transitions={0:[None,0,quasis[0].next_quasis[0],True]},direction=None)
     for k,instr in get_quasis([Instruction]):
         if instr.command in [
-                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','SEZ','UNREAD']:
+                'NOTs', 'COMPs','SLLs','SRLs','SLL2s','SRL2s','ZEROs','ADDIs','SUBIs','LOAD','STORE','LEQZ','UNREAD']:
             for acc in range(4):
                 transitions,direction = get_found_transitions(k,acc)
                 quasis.append(State(instruction=k,acc=acc,transitions=transitions,direction=direction))
@@ -550,6 +599,8 @@ def apply_pres():
             for _,state in get_quasis_from(instr,[State]):
                 for symbol in ['0','1']:
                     transition = state.transitions[symbol]
+                    if not transition[3]:
+                        transition = state.transitions[symbol+'\'']
                     if instr.command=='MAP' and (state.acc,) in instr.map_:
                         mapping = instr.map_[(state.acc,)]
                         transition[0] = str(mapping[1]) + transition[0][1:]
@@ -619,7 +670,7 @@ Return what the value of the ACC should start as for the new instruction
 def get_init_acc(acc,n_step):
     instruction = quasis[n_step]
     command,imm = instruction.command,instruction.imm
-    if command in ['COMPs','SEZ']:
+    if command in ['COMPs','LEQZ']:
         return 1
     elif command in ['NOTs','ZEROs','LOAD','STORE','UNREAD']:
         return acc
@@ -985,9 +1036,9 @@ def create_tape(default_size,sizes={},values={}):
     for var in best_order:
         tape.append(var)
         size = sizes[var] if var in sizes else default_size
-        value = bin(values[var]%(2**size) if var in values else 0)[2:]
+        value = bin(values[var]%(1<<size) if var in values else 0)[2:]
         for k in range(1,size+1):
-            tape.append(value[-k] if k<=len(value) else '0')
+            tape.append((value[-k] if k<=len(value) else '0') + ('\'' if var=='sp' else ''))
     tape.append(best_order[0])
     return tape
 
