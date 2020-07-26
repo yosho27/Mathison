@@ -37,8 +37,7 @@ SUBIs C 1
 BRANCH null end null null
 notprime:
 ADDIs N 1
-ZEROs D 0
-ADDIs D 2
+STORE2 D
 next:
 MOD R N D
 LEQZ R
@@ -47,4 +46,16 @@ ADDIs D 1
 SLT D N
 BRANCH prime next null prime
 end:
+END
+
+PRIM STORE2 N
+LOADI 0 TEMP
+STORENEXT N TEMP
+LOADI 1 TEMP
+STORENEXT N TEMP
+next:
+LOADI 0 TEMP
+STORENEXT N TEMP
+JUMP next
+oob:
 END
