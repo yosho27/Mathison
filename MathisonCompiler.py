@@ -44,7 +44,7 @@ more_transitions = {
     }
 }
 
-functions = []
+functions = {}
 quasis = []
 
 #### CLASSES ####
@@ -255,7 +255,7 @@ def parse_files():
                             raise Exception
                         elif type(parsed_line)==End:
                             function.lines.append(parsed_line)
-                            functions.append(function)
+                            functions[function.command] = function
                             function = None
                         else:
                             function.lines.append(parsed_line)
@@ -284,7 +284,7 @@ next_quasis is always a list of 0 (end of the function body), 1 (normal), 2 (mem
 '''
 def link_lines():
     global functions
-    for function in functions:
+    for function in functions.values():
         lines = function.lines
         for k,quasi in enumerate(lines):
             if type(quasi)==FunctionCall:
@@ -356,42 +356,41 @@ linking the quasis so the line before a FunctionCall links to the FunctionCall w
 '''
 def evaluate_function_call(function_call):
     global functions, quasis
-    for function in functions:
-        if function.command==function_call.command:
-            try:
-                assert len(function.params)==len(function_call.args)
-            except AssertionError:
-                print('Wrong number of arguments on ',function,function_call)
-                1/0
-            index = len(quasis)
-            argsdict = dict(zip(function.params,function_call.args))
-            quasis += [None]*len(function.lines)
-            for k,line in enumerate(function.lines):
-                if type(line)==FunctionCall:
-                    is_prim = function.func_type=='PRIM'
-                    if is_prim:
-                        assert line.command in ['LOAD','LOADNEXT','STORE','STORENEXT','MAP','JUMP','BRANCH','LOADI']
-                        if line.command in ['LOAD','LOADNEXT','STORE','STORENEXT']:
-                            assert line.args[0]==function.params[0]
-                    if line.command=='UNREAD':
-                        if argsdict[line.args[0]] in ['$POP','$TOP']:
-                            quasis[index+k] = End(True,[index+line.next_quasis[0]])
-                            continue
-                        if line.args[0]==function.params[0] and '$TOP' in function_call.args:
-                            line = FunctionCall('UNREADSP',line.args,line.next_quasis)
-                    new_function = functioncall2instruction(line.apply(index,argsdict))
-                    if is_prim:
-                        new_function.is_prim = True
-                    quasis[index+k] = new_function
-                    if type(new_function)==FunctionCall:
-                        new_index = len(quasis)
-                        evaluate_function_call(new_function)
-                        new_function.next_quasis = [new_index]
-                elif type(line)==End:
-                    if line.is_start:
-                        quasis[index+k] = End(True,[index+line.next_quasis[0]])                        
-                    else:
-                        quasis[index+k] = End(False,function_call.next_quasis)
+    function = functions[function_call.command]
+    try:
+        assert len(function.params)==len(function_call.args)
+    except AssertionError:
+        print('Wrong number of arguments on ',function,function_call)
+        1/0
+    index = len(quasis)
+    argsdict = dict(zip(function.params,function_call.args))
+    quasis += [None]*len(function.lines)
+    for k,line in enumerate(function.lines):
+        if type(line)==FunctionCall:
+            is_prim = function.func_type=='PRIM'
+            if is_prim:
+                assert line.command in ['LOAD','LOADNEXT','STORE','STORENEXT','MAP','JUMP','BRANCH','LOADI']
+                if line.command in ['LOAD','LOADNEXT','STORE','STORENEXT']:
+                    assert line.args[0]==function.params[0]
+            if line.command=='UNREAD':
+                if argsdict[line.args[0]] in ['$POP','$TOP']:
+                    quasis[index+k] = End(True,[index+line.next_quasis[0]])
+                    continue
+                if line.args[0]==function.params[0] and '$TOP' in function_call.args:
+                    line = FunctionCall('UNREADSP',line.args,line.next_quasis)
+            new_function = functioncall2instruction(line.apply(index,argsdict))
+            if is_prim:
+                new_function.is_prim = True
+            quasis[index+k] = new_function
+            if type(new_function)==FunctionCall:
+                new_index = len(quasis)
+                evaluate_function_call(new_function)
+                new_function.next_quasis = [new_index]
+        elif type(line)==End:
+            if line.is_start:
+                quasis[index+k] = End(True,[index+line.next_quasis[0]])                        
+            else:
+                quasis[index+k] = End(False,function_call.next_quasis)
 
 '''
 Modify linkage within quasis
