@@ -49,12 +49,10 @@ JAL bin
 
 ADDIs N 1
 ADDIs K 1
-JUMP return
+JR bin
 
 base:
 ADDIs C 1
-
-return:
 JR bin
 
 oob:
@@ -102,12 +100,11 @@ ADDIs J 1
 skipJ:
 
 ADDIs N 1
-JUMP return
+JR trin
 
 base:
 ADDIs C 1
-
-return:
 JR trin
+
 oob:
 END

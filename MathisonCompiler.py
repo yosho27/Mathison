@@ -310,18 +310,24 @@ def write_linked_jumps():
                     max_address[label] += 1
                 quasi.address = max_address[label]
         addresses = {label:create_addresses(N) for label,N in max_address.items()}
+        jr_expanded = set()
         for k,quasi in enumerate(function.lines):
             if type(quasi)==FunctionCall:
                 new_lines = []
+                label = quasi.args[0]
                 if  quasi.command=='JAL':
-                    address = addresses[quasi.args[0]][quasi.address]
+                    address = addresses[label][quasi.address]
                     for bit in address[::-1]:
                         new_lines += [FunctionCall('LOADI',[bit,'TEMP']),
                                       FunctionCall('STORENEXTRED',['sp','TEMP'])]
                     new_lines += [FunctionCall('JUMP',quasi.args),
-                                  Label('_return_' + quasi.args[0] + '_' + address)]
-                elif quasi.command=='JR':
-                    new_lines = expand_jr(addresses[quasi.args[0]],quasi.args[0],'')
+                                  Label('_return_' + label + '_' + address)]
+                elif quasi.command=='JR':                    
+                    if label in jr_expanded:
+                        new_lines = [FunctionCall('JUMP',['_register_'+label+'_'])]
+                    else:
+                        new_lines = expand_jr(addresses[label],label,'')
+                        jr_expanded.add(label)
                 if new_lines:
                     function.lines[k:k+1] = new_lines 
 
