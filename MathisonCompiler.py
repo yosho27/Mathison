@@ -265,7 +265,10 @@ def parse_files():
                             function = parsed_line
                             function.lines = [End(True,[])]
 
-
+'''
+Given the index of the maximum pseudo-address required,
+return a list of dynamically sized pseudo-addresses 
+'''
 def create_addresses(N):
     if N==0:
         return ['']
@@ -274,7 +277,10 @@ def create_addresses(N):
     return ([bin(k)[2:].zfill(length) for k in range(max_full)] +
         ['1'+address for address in create_addresses(N-max_full)])
 
-
+'''
+Given a list of pseudo-addresses, a label name, and some bits of a pseudo-adress,
+return a list of lines for all parts of the return jump that start with those bits
+'''
 def expand_jr(addresses,label,register):
     reg_label = '_register_' + label + '_' + register
     lines = [Label(reg_label)]
@@ -287,6 +293,10 @@ def expand_jr(addresses,label,register):
     return lines
             
 
+'''
+Replace all JAL and JR FunctionCalls in the lines of each FunctionHeader
+    with actual FunctionCalls and labels
+'''
 def write_linked_jumps():
     global functions
     for function in functions.values():
@@ -313,7 +323,7 @@ def write_linked_jumps():
                 elif quasi.command=='JR':
                     new_lines = expand_jr(addresses[quasi.args[0]],quasi.args[0],'')
                 if new_lines:
-                    lines[k:k+1] = new_lines 
+                    function.lines[k:k+1] = new_lines 
 
 
 '''

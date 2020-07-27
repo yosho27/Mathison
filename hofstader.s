@@ -7,24 +7,15 @@ BRANCH null base null null
 PUSH G
 
 SUBIs G 1
-LOADI 0 TEMP
-STORENEXTRED sp TEMP
-JUMP g
-return0:
-LOADI 1 TEMP
-STORENEXTRED sp TEMP
-JUMP g
-return1:
+JAL g
+JAL g
 
-BOLs N $POP {}
-
-NSUBs G N
+NSUBs G $POP
 JUMP return
 base:
 
 return:
-LOADNEXT sp ACC
-BRANCH return0 return1 null null
+JR g
 
 oob:
 END
@@ -40,41 +31,19 @@ BRANCH null base null null
 PUSH N
 
 SUBIs N 1
-LOADI 0 TEMP
-STORENEXTRED sp TEMP
-LOADI 0 TEMP
-STORENEXTRED sp TEMP
-JUMP q
-return00:
-
+JAL q
 ADDIs N 1
 SUBs N Q
-LOADI 1 TEMP
-STORENEXTRED sp TEMP
-LOADI 0 TEMP
-STORENEXTRED sp TEMP
-JUMP q
-return01:
+JAL q
 
 BOLs N $TOP {}
 PUSH Q
 
 SUBIs N 2
-LOADI 0 TEMP
-STORENEXTRED sp TEMP
-LOADI 1 TEMP
-STORENEXTRED sp TEMP
-JUMP q
-return10:
-
+JAL q
 ADDIs N 2
 SUBs N Q
-LOADI 1 TEMP
-STORENEXTRED sp TEMP
-LOADI 1 TEMP
-STORENEXTRED sp TEMP
-JUMP q
-return11:
+JAL q
 
 ADDs Q $POP
 BOLs N $POP {}
@@ -84,10 +53,7 @@ base:
 STORE1 Q
 
 return:
-LOADNEXT sp ACC
-LOADNEXT sp TEMP
-MAP {0x0:00, 0x1:01, 1x0:10, 1x1:11}
-BRANCH return00 return01 return10 return11
+JR q
 
 oob:
 END
