@@ -62,6 +62,7 @@ class FunctionCall:
     command: str
     args: list
     next_quasis: list = None
+    address: int = None
 
     def apply(self,index,argsdict):
         return FunctionCall(
@@ -263,6 +264,57 @@ def parse_files():
                         if type(parsed_line)==FunctionHeader:
                             function = parsed_line
                             function.lines = [End(True,[])]
+
+
+def create_addresses(N):
+    if N==0:
+        return ['']
+    length = len(bin(N))-2
+    max_full = 1<<(length-1)
+    return ([bin(k)[2:].zfill(length) for k in range(max_full)] +
+        ['1'+address for address in create_addresses(N-max_full)])
+
+
+def expand_jr(addresses,label,register):
+    reg_label = '_register_' + label + '_' + register
+    lines = [Label(reg_label)]
+    if register in addresses:
+        lines += [FunctionCall('JUMP',['_return_'+label+'_'+register])]
+    else:
+        lines += [FunctionCall('LOADNEXT',['sp','ACC']),
+                   FunctionCall('BRANCH',[reg_label+'0',reg_label+'1','null','null'])]
+        lines += expand_jr(addresses,label,register+'0') + expand_jr(addresses,label,register+'1')
+    return lines
+            
+
+def write_linked_jumps():
+    global functions
+    for function in functions.values():
+        max_address = {}
+        for quasi in function.lines:
+            if type(quasi)==FunctionCall and quasi.command=='JAL':
+                label = quasi.args[0]
+                if not label in max_address:
+                    max_address[label] = 0
+                else:
+                    max_address[label] += 1
+                quasi.address = max_address[label]
+        addresses = {label:create_addresses(N) for label,N in max_address.items()}
+        for k,quasi in enumerate(function.lines):
+            if type(quasi)==FunctionCall:
+                new_lines = []
+                if  quasi.command=='JAL':
+                    address = addresses[quasi.args[0]][quasi.address]
+                    for bit in address[::-1]:
+                        new_lines += [FunctionCall('LOADI',[bit,'TEMP']),
+                                      FunctionCall('STORENEXTRED',['sp','TEMP'])]
+                    new_lines += [FunctionCall('JUMP',quasi.args),
+                                  Label('_return_' + quasi.args[0] + '_' + address)]
+                elif quasi.command=='JR':
+                    new_lines = expand_jr(addresses[quasi.args[0]],quasi.args[0],'')
+                if new_lines:
+                    lines[k:k+1] = new_lines 
+
 
 '''
 Given a command name, if it's a memory command,
@@ -1059,4 +1111,5 @@ def get_tape_values(tape):
 #### PRE-COMPILATION ####
 
 parse_files()
+write_linked_jumps()
 link_lines()
